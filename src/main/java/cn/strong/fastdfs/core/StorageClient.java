@@ -8,8 +8,10 @@ import java.util.Objects;
 
 import cn.strong.fastdfs.model.StoragePath;
 import cn.strong.fastdfs.model.StorageServerInfo;
+import cn.strong.fastdfs.request.storage.AppendRequest;
 import cn.strong.fastdfs.request.storage.UploadAppenderRequest;
 import cn.strong.fastdfs.request.storage.UploadRequest;
+import cn.strong.fastdfs.response.EmptyDecoder;
 import cn.strong.fastdfs.response.StoragePathDecoder;
 import cn.strong.fastdfs.util.Callback;
 
@@ -70,7 +72,7 @@ public class StorageClient {
 	}
 
 	/**
-	 * 上传追加文件内容
+	 * 上传可追加文件内容
 	 * 
 	 * @param storage
 	 * @param file
@@ -83,7 +85,7 @@ public class StorageClient {
 	}
 
 	/**
-	 * 上传追加文件内容，其中文件内容字段 content 的支持以下类型：
+	 * 上传可追加文件内容，其中文件内容字段 content 的支持以下类型：
 	 * 
 	 * <ul>
 	 * <li>{@link java.io.File}</li>
@@ -110,6 +112,21 @@ public class StorageClient {
 		executor.exec(storage.getAddress(), 
 				new UploadAppenderRequest(content, length, ext,	storage.storePathIndex),
 				StoragePathDecoder.INSTANCE, callback);
+	}
+
+	/**
+	 * 追加文件内容
+	 * 
+	 * @param storage
+	 * @param spath
+	 * @param content
+	 * @param length
+	 * @param callback
+	 */
+	public void append(StorageServerInfo storage, StoragePath spath, Object content, long length,
+			Callback<Void> callback) {
+		executor.exec(storage.getAddress(), new AppendRequest(content, length, spath),
+				EmptyDecoder.INSTANCE, callback);
 	}
 
 }
