@@ -3,7 +3,7 @@
  */
 package cn.strong.fastdfs.core;
 
-import static cn.strong.fastdfs.util.Async.execAsync;
+import static cn.strong.fastdfs.util.Helper.execAsync;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.pool.FixedChannelPool;
