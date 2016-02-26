@@ -4,15 +4,14 @@
 package cn.strong.fastdfs.util;
 
 import static io.netty.util.CharsetUtil.UTF_8;
-import io.netty.buffer.ByteBuf;
-import io.netty.util.CharsetUtil;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.util.CharsetUtil;
 
 /**
  * 帮助类
@@ -21,27 +20,6 @@ import java.util.List;
  *
  */
 public class Helper {
-
-	/**
-	 * 异步执行，当 Future 完成时回调 Callback
-	 * 
-	 * @param future
-	 * @param callback
-	 */
-	public static <T> void execAsync(Future<T> future, Callback<T> callback) {
-		future.addListener(new GenericFutureListener<Future<T>>() {
-
-			@Override
-			public void operationComplete(Future<T> f) throws Exception {
-				if (f.isSuccess()) {
-					callback.onComplete(f.getNow(), null);
-				} else {
-					callback.onComplete(null, f.cause());
-				}
-			}
-
-		});
-	}
 
 	/**
 	 * 关闭
