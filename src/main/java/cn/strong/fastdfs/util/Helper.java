@@ -105,4 +105,18 @@ public class Helper {
 	public static String readString(ByteBuf in) {
 		return in.toString(UTF_8);
 	}
+
+	/**
+	 * 获取文件扩展名
+	 * 
+	 * @param filename
+	 * @return
+	 */
+	public static String getFileExt(String filename) {
+		if (filename == null) {
+			return "";
+		}
+		int idx = filename.lastIndexOf('.');
+		return idx == -1 ? "" : filename.substring(idx + 1).toLowerCase();
+	}
 }
