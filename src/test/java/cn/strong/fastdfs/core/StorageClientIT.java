@@ -144,4 +144,22 @@ public class StorageClientIT {
 		});
 		latch.await();
 	}
+
+	@Test
+	@Ignore
+	public void testDelete() throws InterruptedException, IOException {
+		CountDownLatch latch = new CountDownLatch(1);
+		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
+		StoragePath spath = StoragePath
+				.fromFullPath("group1/M00/09/FF/wKgURFbQHjuACGt4AAAADTVhaBw716.inf");
+		client.delete(info, spath, (p, ex) -> {
+			if (ex != null) {
+				ex.printStackTrace();
+			} else {
+				System.out.println(p);
+			}
+			latch.countDown();
+		});
+		latch.await();
+	}
 }

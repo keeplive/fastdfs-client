@@ -9,6 +9,7 @@ import java.util.Objects;
 import cn.strong.fastdfs.model.StoragePath;
 import cn.strong.fastdfs.model.StorageServerInfo;
 import cn.strong.fastdfs.request.storage.AppendRequest;
+import cn.strong.fastdfs.request.storage.DeleteRequest;
 import cn.strong.fastdfs.request.storage.ModifyRequest;
 import cn.strong.fastdfs.request.storage.UploadAppenderRequest;
 import cn.strong.fastdfs.request.storage.UploadRequest;
@@ -143,6 +144,18 @@ public class StorageClient {
 			Callback<Void> callback) {
 		executor.exec(storage.getAddress(), new ModifyRequest(bytes, bytes.length, spath, offset),
 				EmptyDecoder.INSTANCE, callback);
+	}
+
+	/**
+	 * 删除文件
+	 * 
+	 * @param storage
+	 * @param spath
+	 * @param callback
+	 */
+	public void delete(StorageServerInfo storage, StoragePath spath, Callback<Void> callback) {
+		executor.exec(storage.getAddress(), new DeleteRequest(spath), EmptyDecoder.INSTANCE,
+				callback);
 	}
 
 }
