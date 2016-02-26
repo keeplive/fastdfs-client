@@ -18,7 +18,7 @@ public interface ResponseDecoder<T> {
 	 * 
 	 * @return
 	 */
-	default int expectLength() {
+	default long expectLength() {
 		return -1;
 	}
 

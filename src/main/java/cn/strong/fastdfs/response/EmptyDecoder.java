@@ -16,7 +16,7 @@ public enum EmptyDecoder implements ResponseDecoder<Void> {
 	INSTANCE;
 
 	@Override
-	public int expectLength() {
+	public long expectLength() {
 		return 0;
 	}
 

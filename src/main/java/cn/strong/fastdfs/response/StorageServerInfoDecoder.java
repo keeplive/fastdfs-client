@@ -7,9 +7,9 @@ import static cn.strong.fastdfs.core.Consts.FDFS_GROUP_LEN;
 import static cn.strong.fastdfs.core.Consts.FDFS_HOST_LEN;
 import static cn.strong.fastdfs.core.Consts.FDFS_STORAGE_STORE_LEN;
 import static cn.strong.fastdfs.util.Helper.readString;
-import io.netty.buffer.ByteBuf;
 
 import cn.strong.fastdfs.model.StorageServerInfo;
+import io.netty.buffer.ByteBuf;
 
 /**
  * 存储服务器信息解码器
@@ -22,7 +22,7 @@ public enum StorageServerInfoDecoder implements
 	INSTANCE;
 
 	@Override
-	public int expectLength() {
+	public long expectLength() {
 		return FDFS_STORAGE_STORE_LEN;
 	}
 
