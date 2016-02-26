@@ -88,4 +88,21 @@ public class StorageClientIT {
 		});
 		latch.await();
 	}
+
+	@Test
+	@Ignore
+	public void testUploadAppenderBytes() throws InterruptedException, IOException {
+		byte[] bytes = "Hello fastdfs".getBytes();
+		CountDownLatch latch = new CountDownLatch(1);
+		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
+		client.uploadAppender(info, bytes, bytes.length, "inf", (p, ex) -> {
+			if (ex != null) {
+				ex.printStackTrace();
+			} else {
+				System.out.println(p);
+			}
+			latch.countDown();
+		});
+		latch.await();
+	}
 }
