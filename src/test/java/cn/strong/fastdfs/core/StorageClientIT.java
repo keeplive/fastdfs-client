@@ -8,7 +8,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.CountDownLatch;
 
 import org.junit.After;
 import org.junit.Before;
@@ -43,17 +42,14 @@ public class StorageClientIT {
 	@Test
 	@Ignore
 	public void testUploadFile() throws InterruptedException, IOException {
-		CountDownLatch latch = new CountDownLatch(1);
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
-		client.upload(info, new File("pom.xml"), (p, ex) -> {
-			if (ex != null) {
-				ex.printStackTrace();
+		client.upload(info, new File("pom.xml")).addListener(f -> {
+			if (f.isSuccess()) {
+				System.out.println(f.getNow());
 			} else {
-				System.out.println(p);
+				f.cause().printStackTrace();
 			}
-			latch.countDown();
-		});
-		latch.await();
+		}).await();
 	}
 
 	@Test
@@ -61,143 +57,119 @@ public class StorageClientIT {
 	public void testUploadInputStream() throws InterruptedException, IOException {
 		File file = new File("pom.xml");
 		InputStream input = new FileInputStream(file);
-		CountDownLatch latch = new CountDownLatch(1);
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
-		client.upload(info, input, file.length(), Helper.getFileExt(file.getName()), (p, ex) -> {
-			if (ex != null) {
-				ex.printStackTrace();
+		client.upload(info, input, file.length(), Helper.getFileExt(file.getName())).addListener(f -> {
+			if (f.isSuccess()) {
+				System.out.println(f.getNow());
 			} else {
-				System.out.println(p);
+				f.cause().printStackTrace();
 			}
-			latch.countDown();
-		});
-		latch.await();
+		}).await();
 	}
 
 	@Test
 	@Ignore
 	public void testUploadBytes() throws InterruptedException, IOException {
 		byte[] bytes = "Hello fastdfs".getBytes();
-		CountDownLatch latch = new CountDownLatch(1);
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
-		client.upload(info, bytes, bytes.length, "inf", (p, ex) -> {
-			if (ex != null) {
-				ex.printStackTrace();
+		client.upload(info, bytes, bytes.length, "inf").addListener(f -> {
+			if (f.isSuccess()) {
+				System.out.println(f.getNow());
 			} else {
-				System.out.println(p);
+				f.cause().printStackTrace();
 			}
-			latch.countDown();
-		});
-		latch.await();
+		}).await();
 	}
 
 	@Test
 	@Ignore
 	public void testUploadAppenderBytes() throws InterruptedException, IOException {
 		byte[] bytes = "Hello fastdfs".getBytes();
-		CountDownLatch latch = new CountDownLatch(1);
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
-		client.uploadAppender(info, bytes, bytes.length, "inf", (p, ex) -> {
-			if (ex != null) {
-				ex.printStackTrace();
+		client.uploadAppender(info, bytes, bytes.length, "inf").addListener(f -> {
+			if (f.isSuccess()) {
+				System.out.println(f.getNow());
 			} else {
-				System.out.println(p);
+				f.cause().printStackTrace();
 			}
-			latch.countDown();
-		});
-		latch.await();
+		}).await();
 	}
 
 	@Test
 	@Ignore
 	public void testAppenderBytes() throws InterruptedException, IOException {
 		byte[] bytes = "\nappend fastdfs".getBytes();
-		CountDownLatch latch = new CountDownLatch(1);
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
 		StoragePath spath = StoragePath
 				.fromFullPath("group1/M00/09/FF/wKgURFbQIp6EEG9xAAAAADVhaBw260.inf");
-		client.append(info, spath, bytes, (p, ex) -> {
-			if (ex != null) {
-				ex.printStackTrace();
+		client.append(info, spath, bytes).addListener(f -> {
+			if (f.isSuccess()) {
+				System.out.println(f.getNow());
 			} else {
-				System.out.println(p);
+				f.cause().printStackTrace();
 			}
-			latch.countDown();
-		});
-		latch.await();
+		}).await();
 	}
 
 	@Test
 	@Ignore
 	public void testModify() throws InterruptedException, IOException {
 		byte[] bytes = "modify fastdfs".getBytes();
-		CountDownLatch latch = new CountDownLatch(1);
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
 		StoragePath spath = StoragePath
 				.fromFullPath("group1/M00/09/FF/wKgURFbQIp6EEG9xAAAAADVhaBw260.inf");
-		client.modify(info, spath, 12, bytes, (p, ex) -> {
-			if (ex != null) {
-				ex.printStackTrace();
+		client.modify(info, spath, 12, bytes).addListener(f -> {
+			if (f.isSuccess()) {
+				System.out.println(f.getNow());
 			} else {
-				System.out.println(p);
+				f.cause().printStackTrace();
 			}
-			latch.countDown();
-		});
-		latch.await();
+		}).await();
 	}
 
 	@Test
 	@Ignore
 	public void testDelete() throws InterruptedException, IOException {
-		CountDownLatch latch = new CountDownLatch(1);
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
 		StoragePath spath = StoragePath
 				.fromFullPath("group1/M00/09/FF/wKgURFbQHjuACGt4AAAADTVhaBw716.inf");
-		client.delete(info, spath, (p, ex) -> {
-			if (ex != null) {
-				ex.printStackTrace();
+		client.delete(info, spath).addListener(f -> {
+			if (f.isSuccess()) {
+				System.out.println(f.getNow());
 			} else {
-				System.out.println(p);
+				f.cause().printStackTrace();
 			}
-			latch.countDown();
-		});
-		latch.await();
+		}).await();
 	}
 
 	@Test
 	@Ignore
 	public void testTruncate() throws InterruptedException, IOException {
-		CountDownLatch latch = new CountDownLatch(1);
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
 		StoragePath spath = StoragePath
 				.fromFullPath("group1/M00/09/FF/wKgURFbQIp6EEG9xAAAAADVhaBw260.inf");
-		client.truncate(info, spath, 10, (p, ex) -> {
-			if (ex != null) {
-				ex.printStackTrace();
+		client.truncate(info, spath, 10).addListener(f -> {
+			if (f.isSuccess()) {
+				System.out.println(f.getNow());
 			} else {
-				System.out.println(p);
+				f.cause().printStackTrace();
 			}
-			latch.countDown();
-		});
-		latch.await();
+		}).await();
 	}
 
 	@Test
 	@Ignore
 	public void testDownload() throws InterruptedException, IOException {
-		CountDownLatch latch = new CountDownLatch(1);
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
 		StoragePath spath = StoragePath
 				.fromFullPath("group1/M00/09/FF/wKgURFbQIp6EEG9xAAAAADVhaBw260.inf");
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		client.download(info, spath, out, (p, ex) -> {
-			if (ex != null) {
-				ex.printStackTrace();
+		client.download(info, spath, out).addListener(f -> {
+			if (f.isSuccess()) {
+				System.out.println(f.getNow());
 			} else {
-				System.out.println(new String(out.toByteArray()));
+				f.cause().printStackTrace();
 			}
-			latch.countDown();
-		});
-		latch.await();
+		}).await();
 	}
 }

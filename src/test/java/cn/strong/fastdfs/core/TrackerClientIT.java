@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 import org.junit.After;
 import org.junit.Before;
@@ -12,6 +11,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import cn.strong.fastdfs.model.StoragePath;
+import cn.strong.fastdfs.model.StorageServerInfo;
 import cn.strong.fastdfs.util.Helper;
 
 public class TrackerClientIT {
@@ -36,16 +36,13 @@ public class TrackerClientIT {
 	@Test
 	@Ignore
 	public void testGetUploadStorageString() throws InterruptedException, IOException {
-		CountDownLatch latch = new CountDownLatch(1);
-		client.getUploadStorage("group1", (info, ex) -> {
-			if (ex != null) {
-				System.out.println("error: " + ex);
+		client.getUploadStorage("group1").addListener(f -> {
+			if (f.isSuccess()) {
+				System.out.println(f.getNow());
 			} else {
-				System.out.println(info);
+				f.cause().printStackTrace();
 			}
-			latch.countDown();
-		});
-		latch.await();
+		}).await();
 	}
 
 	@Test
@@ -53,16 +50,13 @@ public class TrackerClientIT {
 	public void testGetDownloadStorage() throws InterruptedException {
 		StoragePath spath = StoragePath
 				.fromFullPath("group1/M00/09/FE/wKgURFbQBVSAcFjdAAAADTVhaBw216.inf");
-		CountDownLatch latch = new CountDownLatch(1);
-		client.getDownloadStorage(spath, (info, ex) -> {
-			if (ex != null) {
-				System.out.println("error: " + ex);
+		client.getDownloadStorage(spath).addListener(f -> {
+			if (f.isSuccess()) {
+				System.out.println(f.getNow());
 			} else {
-				System.out.println(info);
+				f.cause().printStackTrace();
 			}
-			latch.countDown();
-		});
-		latch.await();
+		}).await();
 	}
 
 	@Test
@@ -70,18 +64,17 @@ public class TrackerClientIT {
 	public void testFindDownloadStorages() throws InterruptedException {
 		StoragePath spath = StoragePath
 				.fromFullPath("group1/M00/09/FE/wKgURFbQBVSAcFjdAAAADTVhaBw216.inf");
-		CountDownLatch latch = new CountDownLatch(1);
-		client.findDownloadStorages(spath, (infos, ex) -> {
-			if (ex != null) {
-				System.out.println("error: " + ex);
-			} else {
+		client.findDownloadStorages(spath).addListener(f -> {
+			if (f.isSuccess()) {
+				@SuppressWarnings("unchecked")
+				List<StorageServerInfo> infos = (List<StorageServerInfo>) f.getNow();
 				infos.forEach(info -> {
 					System.out.println(info);
 				});
+			} else {
+				f.cause().printStackTrace();
 			}
-			latch.countDown();
-		});
-		latch.await();
+		}).await();
 	}
 
 }
