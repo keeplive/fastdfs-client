@@ -11,6 +11,7 @@ import cn.strong.fastdfs.model.StorageServerInfo;
 import cn.strong.fastdfs.request.storage.AppendRequest;
 import cn.strong.fastdfs.request.storage.DeleteRequest;
 import cn.strong.fastdfs.request.storage.ModifyRequest;
+import cn.strong.fastdfs.request.storage.TruncateRequest;
 import cn.strong.fastdfs.request.storage.UploadAppenderRequest;
 import cn.strong.fastdfs.request.storage.UploadRequest;
 import cn.strong.fastdfs.response.EmptyDecoder;
@@ -156,6 +157,31 @@ public class StorageClient {
 	public void delete(StorageServerInfo storage, StoragePath spath, Callback<Void> callback) {
 		executor.exec(storage.getAddress(), new DeleteRequest(spath), EmptyDecoder.INSTANCE,
 				callback);
+	}
+
+	/**
+	 * 截取文件
+	 * 
+	 * @param storage
+	 * @param spath
+	 * @param callback
+	 */
+	public void truncate(StorageServerInfo storage, StoragePath spath, Callback<Void> callback) {
+		truncate(storage, spath, 0, callback);
+	}
+
+	/**
+	 * 截取文件
+	 * 
+	 * @param storage
+	 * @param spath
+	 * @param truncatedSize
+	 * @param callback
+	 */
+	public void truncate(StorageServerInfo storage, StoragePath spath, int truncatedSize,
+			Callback<Void> callback) {
+		executor.exec(storage.getAddress(), new TruncateRequest(spath, truncatedSize),
+				EmptyDecoder.INSTANCE, callback);
 	}
 
 }
