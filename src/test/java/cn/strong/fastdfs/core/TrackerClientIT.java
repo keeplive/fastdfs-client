@@ -21,8 +21,7 @@ public class TrackerClientIT {
 
 	@Before
 	public void setup() {
-		executor = new FastdfsExecutor();
-		executor.afterPropertiesSet();
+		executor = new FastdfsExecutor(new FastdfsSettings());
 		List<InetSocketAddress> seeds = Arrays
 				.asList(new InetSocketAddress("192.168.20.68", 22122));
 		client = new TrackerClient(executor, seeds);

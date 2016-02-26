@@ -29,8 +29,7 @@ public class StorageClientIT {
 
 	@Before
 	public void setup() {
-		executor = new FastdfsExecutor();
-		executor.afterPropertiesSet();
+		executor = new FastdfsExecutor(new FastdfsSettings());
 		client = new StorageClient(executor);
 	}
 
