@@ -21,7 +21,8 @@ import cn.strong.fastdfs.request.storage.UploadRequest;
 import cn.strong.fastdfs.response.EmptyDecoder;
 import cn.strong.fastdfs.response.StoragePathDecoder;
 import cn.strong.fastdfs.response.StreamReceiver;
-import cn.strong.fastdfs.util.Callback;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.ProgressiveFuture;
 
 /**
  * StorageClient
@@ -41,12 +42,12 @@ public class StorageClient {
 	 * 
 	 * @param storage
 	 * @param file
-	 * @param callback
+	 * @return
 	 */
-	public void upload(StorageServerInfo storage, File file, Callback<StoragePath> callback) {
-		executor.exec(storage.getAddress(), 
+	public Future<StoragePath> upload(StorageServerInfo storage, File file) {
+		return executor.execute(storage.getAddress(), 
 				new UploadRequest(file, storage.storePathIndex),
-				StoragePathDecoder.INSTANCE, callback);
+				StoragePathDecoder.INSTANCE);
 	}
 
 	/**
@@ -70,13 +71,11 @@ public class StorageClient {
 	 *            内容长度
 	 * @param ext
 	 *            扩展名
-	 * @param callback
 	 */
-	public void upload(StorageServerInfo storage, Object content, long size, String ext,
-			Callback<StoragePath> callback) {
-		executor.exec(storage.getAddress(),
+	public Future<StoragePath> upload(StorageServerInfo storage, Object content, long size, String ext) {
+		return executor.execute(storage.getAddress(),
 				new UploadRequest(content, size, ext, storage.storePathIndex),
-				StoragePathDecoder.INSTANCE, callback);
+				StoragePathDecoder.INSTANCE);
 	}
 
 	/**
@@ -84,12 +83,11 @@ public class StorageClient {
 	 * 
 	 * @param storage
 	 * @param file
-	 * @param callback
 	 */
-	public void uploadAppender(StorageServerInfo storage, File file, Callback<StoragePath> callback) {
-		executor.exec(storage.getAddress(),
+	public Future<StoragePath> uploadAppender(StorageServerInfo storage, File file) {
+		return executor.execute(storage.getAddress(),
 				new UploadAppenderRequest(file, storage.storePathIndex),
-				StoragePathDecoder.INSTANCE, callback);
+				StoragePathDecoder.INSTANCE);
 	}
 
 	/**
@@ -113,13 +111,11 @@ public class StorageClient {
 	 *            内容长度
 	 * @param ext
 	 *            扩展名
-	 * @param callback
 	 */
-	public void uploadAppender(StorageServerInfo storage, Object content, long size, String ext,
-			Callback<StoragePath> callback) {
-		executor.exec(storage.getAddress(), 
+	public Future<StoragePath> uploadAppender(StorageServerInfo storage, Object content, long size, String ext) {
+		return executor.execute(storage.getAddress(), 
 				new UploadAppenderRequest(content, size, ext, storage.storePathIndex),
-				StoragePathDecoder.INSTANCE, callback);
+				StoragePathDecoder.INSTANCE);
 	}
 
 	/**
@@ -129,12 +125,10 @@ public class StorageClient {
 	 * @param spath
 	 * @param content
 	 * @param length
-	 * @param callback
 	 */
-	public void append(StorageServerInfo storage, StoragePath spath, byte[] bytes,
-			Callback<Void> callback) {
-		executor.exec(storage.getAddress(), new AppendRequest(bytes, bytes.length, spath),
-				EmptyDecoder.INSTANCE, callback);
+	public Future<Void> append(StorageServerInfo storage, StoragePath spath, byte[] bytes) {
+		return executor.execute(storage.getAddress(), new AppendRequest(bytes, bytes.length, spath),
+				EmptyDecoder.INSTANCE);
 	}
 
 	/**
@@ -144,12 +138,10 @@ public class StorageClient {
 	 * @param spath
 	 * @param content
 	 * @param length
-	 * @param callback
 	 */
-	public void modify(StorageServerInfo storage, StoragePath spath, int offset, byte[] bytes,
-			Callback<Void> callback) {
-		executor.exec(storage.getAddress(), new ModifyRequest(bytes, bytes.length, spath, offset),
-				EmptyDecoder.INSTANCE, callback);
+	public Future<Void> modify(StorageServerInfo storage, StoragePath spath, int offset, byte[] bytes) {
+		return executor.execute(storage.getAddress(), new ModifyRequest(bytes, bytes.length, spath, offset),
+				EmptyDecoder.INSTANCE);
 	}
 
 	/**
@@ -157,11 +149,9 @@ public class StorageClient {
 	 * 
 	 * @param storage
 	 * @param spath
-	 * @param callback
 	 */
-	public void delete(StorageServerInfo storage, StoragePath spath, Callback<Void> callback) {
-		executor.exec(storage.getAddress(), new DeleteRequest(spath), EmptyDecoder.INSTANCE,
-				callback);
+	public Future<Void> delete(StorageServerInfo storage, StoragePath spath) {
+		return executor.execute(storage.getAddress(), new DeleteRequest(spath), EmptyDecoder.INSTANCE);
 	}
 
 	/**
@@ -169,10 +159,9 @@ public class StorageClient {
 	 * 
 	 * @param storage
 	 * @param spath
-	 * @param callback
 	 */
-	public void truncate(StorageServerInfo storage, StoragePath spath, Callback<Void> callback) {
-		truncate(storage, spath, 0, callback);
+	public Future<Void> truncate(StorageServerInfo storage, StoragePath spath) {
+		return truncate(storage, spath, 0);
 	}
 
 	/**
@@ -181,12 +170,10 @@ public class StorageClient {
 	 * @param storage
 	 * @param spath
 	 * @param truncatedSize
-	 * @param callback
 	 */
-	public void truncate(StorageServerInfo storage, StoragePath spath, int truncatedSize,
-			Callback<Void> callback) {
-		executor.exec(storage.getAddress(), new TruncateRequest(spath, truncatedSize),
-				EmptyDecoder.INSTANCE, callback);
+	public Future<Void> truncate(StorageServerInfo storage, StoragePath spath, int truncatedSize) {
+		return executor.execute(storage.getAddress(), new TruncateRequest(spath, truncatedSize),
+				EmptyDecoder.INSTANCE);
 	}
 	
 	/**
@@ -200,11 +187,9 @@ public class StorageClient {
 	 * @param storage
 	 * @param spath
 	 * @param output
-	 * @param callback
 	 */
-	public void download(StorageServerInfo storage, StoragePath spath, Object output,
-			Callback<Void> callback) {
-		download(storage, spath, DEFAULT_OFFSET, SIZE_UNLIMIT, output, callback);
+	public ProgressiveFuture<Void> download(StorageServerInfo storage, StoragePath spath, Object output) {
+		return download(storage, spath, DEFAULT_OFFSET, SIZE_UNLIMIT, output);
 	}
 
 	/**
@@ -215,12 +200,11 @@ public class StorageClient {
 	 * @param offset
 	 * @param size
 	 * @param output
-	 * @param callback
 	 */
-	public void download(StorageServerInfo storage, StoragePath spath, int offset, int size,
-			Object output, Callback<Void> callback) {
-		executor.exec(storage.getAddress(), new DownloadRequest(spath, offset, size),
-				StreamReceiver.newInstance(output), callback);
+	public ProgressiveFuture<Void> download(StorageServerInfo storage, StoragePath spath, int offset, int size,
+			Object output) {
+		return executor.execute(storage.getAddress(), new DownloadRequest(spath, offset, size),
+				StreamReceiver.newInstance(output));
 	}
 
 }
