@@ -7,6 +7,7 @@ import static cn.strong.fastdfs.request.storage.DownloadRequest.DEFAULT_OFFSET;
 import static cn.strong.fastdfs.request.storage.DownloadRequest.SIZE_UNLIMIT;
 
 import java.io.File;
+import java.util.Map;
 import java.util.Objects;
 
 import cn.strong.fastdfs.model.StoragePath;
@@ -14,11 +15,14 @@ import cn.strong.fastdfs.model.StorageServerInfo;
 import cn.strong.fastdfs.request.storage.AppendRequest;
 import cn.strong.fastdfs.request.storage.DeleteRequest;
 import cn.strong.fastdfs.request.storage.DownloadRequest;
+import cn.strong.fastdfs.request.storage.GetMetadataRequest;
 import cn.strong.fastdfs.request.storage.ModifyRequest;
+import cn.strong.fastdfs.request.storage.SetMetadataRequest;
 import cn.strong.fastdfs.request.storage.TruncateRequest;
 import cn.strong.fastdfs.request.storage.UploadAppenderRequest;
 import cn.strong.fastdfs.request.storage.UploadRequest;
 import cn.strong.fastdfs.response.EmptyDecoder;
+import cn.strong.fastdfs.response.MetadataDecoder;
 import cn.strong.fastdfs.response.StoragePathDecoder;
 import cn.strong.fastdfs.response.StreamReceiver;
 import io.netty.util.concurrent.Future;
@@ -207,4 +211,35 @@ public class StorageClient {
 				StreamReceiver.newInstance(output));
 	}
 
+	/**
+	 * 设置文件元数据
+	 * 
+	 * @param storage
+	 *            存储服务器信息，应该由 tracker 查询得到
+	 * @param spath
+	 *            服务器存储路径
+	 * @param metadata
+	 *            元数据
+	 * @param flag
+	 *            设置标识
+	 * @return
+	 */
+	public Future<Void> setMetadata(StorageServerInfo storage, StoragePath spath, Map<String, String> metadata,
+			byte flag) {
+		return executor.execute(storage.getAddress(), new SetMetadataRequest(spath, metadata, flag),
+				EmptyDecoder.INSTANCE);
+	}
+
+	/**
+	 * 获取文件元数据
+	 * 
+	 * @param storage
+	 *            存储服务器信息，应该由 tracker 查询得到
+	 * @param path
+	 *            服务器存储路径
+	 * @return
+	 */
+	public Future<Map<String, String>> getMetadata(StorageServerInfo storage, StoragePath path) {
+		return executor.execute(storage.getAddress(), new GetMetadataRequest(path), MetadataDecoder.INSTANCE);
+	}
 }
