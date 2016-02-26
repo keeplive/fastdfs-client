@@ -9,7 +9,7 @@ import cn.strong.fastdfs.model.StoragePath;
 import cn.strong.fastdfs.request.AbstractStoragePathRequest;
 
 /**
- * 获取可下载的存储服务器
+ * 获取可更新的存储服务器
  * 
  * @author liulongbiao
  *
