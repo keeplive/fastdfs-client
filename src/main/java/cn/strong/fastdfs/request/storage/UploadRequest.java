@@ -9,6 +9,8 @@ import static cn.strong.fastdfs.core.Consts.FDFS_STORE_PATH_INDEX_LEN;
 import static cn.strong.fastdfs.core.Consts.HEAD_LEN;
 import static cn.strong.fastdfs.util.Helper.writeFixLength;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.DefaultFileRegion;
@@ -82,16 +84,29 @@ public class UploadRequest implements Sender {
 
 	@Override
 	public void send(Channel ch) {
-		int preLen = FDFS_STORE_PATH_INDEX_LEN + FDFS_PROTO_PKG_LEN_SIZE + FDFS_FILE_EXT_LEN;
-		ByteBuf buf = ch.alloc().buffer(HEAD_LEN + preLen);
-		buf.writeLong(preLen + length);
-		buf.writeByte(cmd());
-		buf.writeByte(ERRNO_OK);
+		ByteBufAllocator alloc = ch.alloc();
+		ByteBuf meta = meta(alloc);
+
+		ByteBuf head = alloc.buffer(HEAD_LEN);
+		head.writeLong(meta.readableBytes() + length);
+		head.writeByte(cmd());
+		head.writeByte(ERRNO_OK);
+
+		CompositeByteBuf cbb = alloc.compositeBuffer();
+		cbb.addComponents(head, meta);
+		cbb.writerIndex(head.readableBytes() + meta.readableBytes());
+		ch.write(cbb);
+
+		ch.writeAndFlush(content);
+	}
+
+	protected ByteBuf meta(ByteBufAllocator alloc) {
+		int metaLen = FDFS_STORE_PATH_INDEX_LEN + FDFS_PROTO_PKG_LEN_SIZE + FDFS_FILE_EXT_LEN;
+		ByteBuf buf = alloc.buffer(metaLen);
 		buf.writeByte(storePathIndex);
 		buf.writeLong(length);
 		writeFixLength(buf, ext, FDFS_FILE_EXT_LEN);
-		ch.write(buf);
-		ch.writeAndFlush(content);
+		return buf;
 	}
 
 	protected byte cmd() {
