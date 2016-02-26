@@ -3,18 +3,15 @@
  */
 package cn.strong.fastdfs.core;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.pool.ChannelPool;
-import io.netty.handler.codec.ByteToMessageDecoder;
-import io.netty.util.concurrent.DefaultPromise;
-import io.netty.util.concurrent.Promise;
-
 import java.util.List;
 
 import cn.strong.fastdfs.request.Sender;
 import cn.strong.fastdfs.response.Receiver;
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.util.concurrent.Promise;
 
 /**
  * Fastdfs 协议处理器
@@ -47,23 +44,16 @@ public class FastdfsClientHandler extends ByteToMessageDecoder {
 
 	public static final class Operation<T> {
 
-		public final ChannelPool pool;
+		public final Promise<T> promise;
 		public final Channel channel;
 		public final Sender sender;
 		public final Receiver<T> receiver;
 
-		public final Promise<T> promise;
-
-		public Operation(ChannelPool pool, Channel channel, Sender sender, Receiver<T> receiver) {
-			super();
-			this.pool = pool;
+		public Operation(Promise<T> promise, Channel channel, Sender sender, Receiver<T> receiver) {
+			this.promise = promise;
 			this.channel = channel;
 			this.sender = sender;
 			this.receiver = receiver;
-			this.promise = new DefaultPromise<>(channel.eventLoop());
-			this.promise.addListener(f -> {
-				pool.release(channel);
-			});
 		}
 
 		public void execute() {
@@ -84,7 +74,7 @@ public class FastdfsClientHandler extends ByteToMessageDecoder {
 		}
 
 		public void setError(Throwable cause) {
-			promise.setFailure(cause);
+			promise.tryFailure(cause);
 		}
 	}
 }

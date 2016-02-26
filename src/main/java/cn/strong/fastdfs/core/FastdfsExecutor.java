@@ -3,11 +3,6 @@
  */
 package cn.strong.fastdfs.core;
 
-import static cn.strong.fastdfs.util.Helper.execAsync;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.pool.FixedChannelPool;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -20,7 +15,14 @@ import cn.strong.fastdfs.request.Sender;
 import cn.strong.fastdfs.response.DefaultReciver;
 import cn.strong.fastdfs.response.Receiver;
 import cn.strong.fastdfs.response.ResponseDecoder;
-import cn.strong.fastdfs.util.Callback;
+import cn.strong.fastdfs.response.StreamReceiver;
+import io.netty.channel.Channel;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.pool.FixedChannelPool;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
+import io.netty.util.concurrent.ProgressivePromise;
+import io.netty.util.concurrent.Promise;
 
 /**
  * FastdfsSession 连接
@@ -30,7 +32,7 @@ import cn.strong.fastdfs.util.Callback;
  */
 public class FastdfsExecutor implements Closeable {
 
-	private EventLoopGroup group;
+	private NioEventLoopGroup group;
 	private FastdfsChannelPoolMap poolMap;
 
 	private FastdfsSettings settings;
@@ -44,7 +46,7 @@ public class FastdfsExecutor implements Closeable {
 		if (settings == null) {
 			settings = new FastdfsSettings();
 		}
-		group = new NioEventLoopGroup();
+		group = new NioEventLoopGroup(settings.getEventLoopThreads());
 		poolMap = new FastdfsChannelPoolMap(group, settings);
 	}
 
@@ -53,39 +55,59 @@ public class FastdfsExecutor implements Closeable {
 	 * 
 	 * @param addr
 	 * @param sender
-	 * @param receiver
-	 * @param callback
+	 * @param decoder
+	 * @return
 	 */
-	public <T> void exec(InetSocketAddress addr, Sender sender, Receiver<T> receiver,
-			Callback<T> callback) {
+	public <T> Future<T> execute(InetSocketAddress addr, Sender sender, ResponseDecoder<T> decoder) {
+		Promise<T> promise = group.next().newPromise();
 		FixedChannelPool pool = poolMap.get(addr);
-		execAsync(pool.acquire(), (r, ex) -> {
-			if (ex != null) {
-				callback.onComplete(null, new FastdfsConnectionException("connect to host "
-						+ addr.toString() + " error", ex));
-			} else {
-				try {
-					Operation<T> operation = new Operation<T>(pool, r, sender, receiver);
-					operation.execute();
-					execAsync(operation.promise, callback);
-				} catch (Exception e) {
-					callback.onComplete(null, e);
-				}
-			}
-		});
+		pool.acquire()
+				.addListener(new PoolChannelFutureListener<T>(promise, pool, sender, new DefaultReciver<>(decoder)));
+		return promise;
 	}
 
-	/**
-	 * 访问 Fastdfs 服务器
-	 * 
-	 * @param addr
-	 * @param sender
-	 * @param decoder
-	 * @param callback
-	 */
-	public <T> void exec(InetSocketAddress addr, Sender sender, ResponseDecoder<T> decoder,
-			Callback<T> callback) {
-		exec(addr, sender, new DefaultReciver<>(decoder), callback);
+	public ProgressivePromise<Void> execute(InetSocketAddress addr, Sender sender, StreamReceiver receiver) {
+		ProgressivePromise<Void> promise = group.next().newProgressivePromise();
+		FixedChannelPool pool = poolMap.get(addr);
+		pool.acquire().addListener(new PoolChannelFutureListener<Void>(promise, pool, sender, receiver));
+		return promise;
+	}
+
+	private static class PoolChannelFutureListener<T> implements FutureListener<Channel> {
+
+		final Promise<T> promise;
+		final FixedChannelPool pool;
+		final Sender sender;
+		final Receiver<T> receiver;
+
+		public PoolChannelFutureListener(Promise<T> promise, FixedChannelPool pool, Sender sender,
+				Receiver<T> receiver) {
+			this.promise = promise;
+			this.pool = pool;
+			this.sender = sender;
+			this.receiver = receiver;
+		}
+
+		@Override
+		public void operationComplete(Future<Channel> future) throws Exception {
+			if (future.isCancelled()) {
+				promise.tryFailure(new FastdfsException("connection is canceled"));
+			} else if (!future.isSuccess()) {
+				promise.tryFailure(future.cause());
+			} else {
+				Channel ch = future.getNow();
+				promise.addListener(f -> {
+					pool.release(ch);
+				});
+				try {
+					Operation<T> operation = new Operation<T>(promise, ch, sender, receiver);
+					operation.execute();
+				} catch (Exception e) {
+					promise.tryFailure(e);
+				}
+			}
+		}
+
 	}
 
 	@PreDestroy
