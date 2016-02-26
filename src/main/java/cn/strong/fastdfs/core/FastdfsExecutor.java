@@ -17,7 +17,9 @@ import javax.annotation.PreDestroy;
 
 import cn.strong.fastdfs.core.FastdfsClientHandler.Operation;
 import cn.strong.fastdfs.request.Sender;
+import cn.strong.fastdfs.response.DefaultReciver;
 import cn.strong.fastdfs.response.Receiver;
+import cn.strong.fastdfs.response.ResponseDecoder;
 import cn.strong.fastdfs.util.Callback;
 
 /**
@@ -46,6 +48,14 @@ public class FastdfsExecutor implements Closeable {
 		poolMap = new FastdfsChannelPoolMap(group, settings);
 	}
 
+	/**
+	 * 访问 Fastdfs 服务器
+	 * 
+	 * @param addr
+	 * @param sender
+	 * @param receiver
+	 * @param callback
+	 */
 	public <T> void exec(InetSocketAddress addr, Sender sender, Receiver<T> receiver,
 			Callback<T> callback) {
 		FixedChannelPool pool = poolMap.get(addr);
@@ -63,6 +73,19 @@ public class FastdfsExecutor implements Closeable {
 				}
 			}
 		});
+	}
+
+	/**
+	 * 访问 Fastdfs 服务器
+	 * 
+	 * @param addr
+	 * @param sender
+	 * @param decoder
+	 * @param callback
+	 */
+	public <T> void exec(InetSocketAddress addr, Sender sender, ResponseDecoder<T> decoder,
+			Callback<T> callback) {
+		exec(addr, sender, new DefaultReciver<>(decoder), callback);
 	}
 
 	@PreDestroy
