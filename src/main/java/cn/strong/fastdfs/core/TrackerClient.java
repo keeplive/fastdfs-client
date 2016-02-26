@@ -19,8 +19,8 @@ import cn.strong.fastdfs.request.tracker.GetUpdateStorageRequest;
 import cn.strong.fastdfs.request.tracker.GetUploadStorageRequest;
 import cn.strong.fastdfs.response.StorageServerInfoDecoder;
 import cn.strong.fastdfs.response.StorageServerInfoListDecoder;
-import cn.strong.fastdfs.util.Callback;
 import cn.strong.fastdfs.util.Helper;
+import io.netty.util.concurrent.Future;
 
 /**
  * TrackerClient
@@ -63,8 +63,8 @@ public class TrackerClient {
 	 * 
 	 * @param callback
 	 */
-	public void getUploadStorage(Callback<StorageServerInfo> callback) {
-		getUploadStorage(null, callback);
+	public Future<StorageServerInfo> getUploadStorage() {
+		return getUploadStorage(null);
 	}
 
 	/**
@@ -73,9 +73,10 @@ public class TrackerClient {
 	 * @param group
 	 * @param callback
 	 */
-	public void getUploadStorage(String group, Callback<StorageServerInfo> callback) {
-		executor.exec(pick(), new GetUploadStorageRequest(group),
-				StorageServerInfoDecoder.INSTANCE, callback);
+	public Future<StorageServerInfo> getUploadStorage(String group) {
+		return executor.execute(pick(), 
+				new GetUploadStorageRequest(group), 
+				StorageServerInfoDecoder.INSTANCE);
 	}
 
 	/**
@@ -84,9 +85,11 @@ public class TrackerClient {
 	 * @param path
 	 * @param callback
 	 */
-	public void getDownloadStorage(StoragePath path, Callback<StorageServerInfo> callback) {
-		executor.exec(pick(), new GetDownloadStorageRequest(path),
-				StorageServerInfoListDecoder.INSTANCE, Callback.compose(callback, Helper::first));
+	public Future<StorageServerInfo> getDownloadStorage(StoragePath path) {
+		return executor.execute(pick(), 
+				new GetDownloadStorageRequest(path), 
+				StorageServerInfoListDecoder.INSTANCE,
+				Helper::first);
 	}
 
 	/**
@@ -95,9 +98,11 @@ public class TrackerClient {
 	 * @param path
 	 * @param callback
 	 */
-	public void getUpdateStorage(StoragePath path, Callback<StorageServerInfo> callback) {
-		executor.exec(pick(), new GetUpdateStorageRequest(path),
-				StorageServerInfoListDecoder.INSTANCE, Callback.compose(callback, Helper::first));
+	public Future<StorageServerInfo> getUpdateStorage(StoragePath path) {
+		return executor.execute(pick(), 
+				new GetUpdateStorageRequest(path), 
+				StorageServerInfoListDecoder.INSTANCE,
+				Helper::first);
 	}
 
 	/**
@@ -106,8 +111,9 @@ public class TrackerClient {
 	 * @param path
 	 * @return
 	 */
-	public void findDownloadStorages(StoragePath path, Callback<List<StorageServerInfo>> callback) {
-		executor.exec(pick(), new FindDownloadStoragesRequest(path),
-				StorageServerInfoListDecoder.INSTANCE, callback);
+	public Future<List<StorageServerInfo>> findDownloadStorages(StoragePath path) {
+		return executor.execute(pick(), 
+				new FindDownloadStoragesRequest(path), 
+				StorageServerInfoListDecoder.INSTANCE);
 	}
 }
