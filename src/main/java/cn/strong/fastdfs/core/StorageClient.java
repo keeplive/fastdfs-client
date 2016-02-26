@@ -3,6 +3,9 @@
  */
 package cn.strong.fastdfs.core;
 
+import static cn.strong.fastdfs.request.storage.DownloadRequest.DEFAULT_OFFSET;
+import static cn.strong.fastdfs.request.storage.DownloadRequest.SIZE_UNLIMIT;
+
 import java.io.File;
 import java.util.Objects;
 
@@ -10,12 +13,14 @@ import cn.strong.fastdfs.model.StoragePath;
 import cn.strong.fastdfs.model.StorageServerInfo;
 import cn.strong.fastdfs.request.storage.AppendRequest;
 import cn.strong.fastdfs.request.storage.DeleteRequest;
+import cn.strong.fastdfs.request.storage.DownloadRequest;
 import cn.strong.fastdfs.request.storage.ModifyRequest;
 import cn.strong.fastdfs.request.storage.TruncateRequest;
 import cn.strong.fastdfs.request.storage.UploadAppenderRequest;
 import cn.strong.fastdfs.request.storage.UploadRequest;
 import cn.strong.fastdfs.response.EmptyDecoder;
 import cn.strong.fastdfs.response.StoragePathDecoder;
+import cn.strong.fastdfs.response.StreamReceiver;
 import cn.strong.fastdfs.util.Callback;
 
 /**
@@ -182,6 +187,40 @@ public class StorageClient {
 			Callback<Void> callback) {
 		executor.exec(storage.getAddress(), new TruncateRequest(spath, truncatedSize),
 				EmptyDecoder.INSTANCE, callback);
+	}
+	
+	/**
+	 * 下载文件，其输出 output 参数支持以下类型
+	 * 
+	 * <ul>
+	 * <li>{@link java.io.OutputStream}</li>
+	 * <li>{@link java.nio.channels.GatheringByteChannel}</li>
+	 * </ul>
+	 * 
+	 * @param storage
+	 * @param spath
+	 * @param output
+	 * @param callback
+	 */
+	public void download(StorageServerInfo storage, StoragePath spath, Object output,
+			Callback<Void> callback) {
+		download(storage, spath, DEFAULT_OFFSET, SIZE_UNLIMIT, output, callback);
+	}
+
+	/**
+	 * 下载文件
+	 * 
+	 * @param storage
+	 * @param spath
+	 * @param offset
+	 * @param size
+	 * @param output
+	 * @param callback
+	 */
+	public void download(StorageServerInfo storage, StoragePath spath, int offset, int size,
+			Object output, Callback<Void> callback) {
+		executor.exec(storage.getAddress(), new DownloadRequest(spath, offset, size),
+				StreamReceiver.newInstance(output), callback);
 	}
 
 }

@@ -3,6 +3,7 @@
  */
 package cn.strong.fastdfs.core;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -175,6 +176,25 @@ public class StorageClientIT {
 				ex.printStackTrace();
 			} else {
 				System.out.println(p);
+			}
+			latch.countDown();
+		});
+		latch.await();
+	}
+
+	@Test
+	@Ignore
+	public void testDownload() throws InterruptedException, IOException {
+		CountDownLatch latch = new CountDownLatch(1);
+		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
+		StoragePath spath = StoragePath
+				.fromFullPath("group1/M00/09/FF/wKgURFbQIp6EEG9xAAAAADVhaBw260.inf");
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		client.download(info, spath, out, (p, ex) -> {
+			if (ex != null) {
+				ex.printStackTrace();
+			} else {
+				System.out.println(new String(out.toByteArray()));
 			}
 			latch.countDown();
 		});
