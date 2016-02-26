@@ -21,11 +21,6 @@ public enum StoragePathDecoder implements ResponseDecoder<StoragePath> {
 	INSTANCE;
 
 	@Override
-	public long expectLength() {
-		return -1;
-	}
-
-	@Override
 	public StoragePath decode(ByteBuf in) {
 		int length = in.readableBytes();
 		if (length <= FDFS_GROUP_LEN) {
