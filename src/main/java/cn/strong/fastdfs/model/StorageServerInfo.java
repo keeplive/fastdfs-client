@@ -17,22 +17,17 @@ public class StorageServerInfo {
 	public final String group;
 	public final String host;
 	public final int port;
-	public final int storePathIndex;
+	public final byte storePathIndex;
 
-	public StorageServerInfo(String group, String host, int port,
-			int storePathIndex) {
+	public StorageServerInfo(String group, String host, int port, byte storePathIndex) {
 		this.group = group;
 		this.host = host;
 		this.port = port;
 		this.storePathIndex = storePathIndex;
 	}
 
-	public StorageServerInfo(String group, String host, int port, byte storePath) {
-		this(group, host, port, storePath < 0 ? 256 + storePath : storePath);
-	}
-
 	public StorageServerInfo(String group, String host, int port) {
-		this(group, host, port, 0);
+		this(group, host, port, (byte) 0);
 	}
 
 	@Override
