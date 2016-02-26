@@ -21,11 +21,11 @@ import cn.strong.fastdfs.request.Sender;
  * @author liulongbiao
  *
  */
-public class GetUploadStorage implements Sender {
+public class GetUploadStorageRequest implements Sender {
 
 	private String group;
 
-	public GetUploadStorage(String group) {
+	public GetUploadStorageRequest(String group) {
 		this.group = group;
 	}
 

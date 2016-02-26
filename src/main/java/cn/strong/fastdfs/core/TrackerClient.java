@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import cn.strong.fastdfs.model.StorageServerInfo;
-import cn.strong.fastdfs.request.tracker.GetUploadStorage;
+import cn.strong.fastdfs.request.tracker.GetUploadStorageRequest;
 import cn.strong.fastdfs.response.DefaultReciver;
 import cn.strong.fastdfs.response.StorageServerInfoDecoder;
 import cn.strong.fastdfs.util.Callback;
@@ -58,7 +58,7 @@ public class TrackerClient {
 	}
 
 	public void getUploadStorage(String group, Callback<StorageServerInfo> callback) {
-		executor.exec(pick(), new GetUploadStorage(group), new DefaultReciver<>(
+		executor.exec(pick(), new GetUploadStorageRequest(group), new DefaultReciver<>(
 				StorageServerInfoDecoder.INSTANCE), callback);
 	}
 }
