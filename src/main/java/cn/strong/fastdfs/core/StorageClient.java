@@ -9,6 +9,7 @@ import java.util.Objects;
 import cn.strong.fastdfs.model.StoragePath;
 import cn.strong.fastdfs.model.StorageServerInfo;
 import cn.strong.fastdfs.request.storage.AppendRequest;
+import cn.strong.fastdfs.request.storage.ModifyRequest;
 import cn.strong.fastdfs.request.storage.UploadAppenderRequest;
 import cn.strong.fastdfs.request.storage.UploadRequest;
 import cn.strong.fastdfs.response.EmptyDecoder;
@@ -58,16 +59,16 @@ public class StorageClient {
 	 *            存储服务器信息
 	 * @param content
 	 *            上传内容
-	 * @param length
+	 * @param size
 	 *            内容长度
 	 * @param ext
 	 *            扩展名
 	 * @param callback
 	 */
-	public void upload(StorageServerInfo storage, Object content, long length, String ext,
+	public void upload(StorageServerInfo storage, Object content, long size, String ext,
 			Callback<StoragePath> callback) {
 		executor.exec(storage.getAddress(),
-				new UploadRequest(content, length, ext, storage.storePathIndex),
+				new UploadRequest(content, size, ext, storage.storePathIndex),
 				StoragePathDecoder.INSTANCE, callback);
 	}
 
@@ -101,16 +102,16 @@ public class StorageClient {
 	 *            存储服务器信息
 	 * @param content
 	 *            上传内容
-	 * @param length
+	 * @param size
 	 *            内容长度
 	 * @param ext
 	 *            扩展名
 	 * @param callback
 	 */
-	public void uploadAppender(StorageServerInfo storage, Object content, long length, String ext,
+	public void uploadAppender(StorageServerInfo storage, Object content, long size, String ext,
 			Callback<StoragePath> callback) {
 		executor.exec(storage.getAddress(), 
-				new UploadAppenderRequest(content, length, ext,	storage.storePathIndex),
+				new UploadAppenderRequest(content, size, ext, storage.storePathIndex),
 				StoragePathDecoder.INSTANCE, callback);
 	}
 
@@ -123,9 +124,24 @@ public class StorageClient {
 	 * @param length
 	 * @param callback
 	 */
-	public void append(StorageServerInfo storage, StoragePath spath, Object content, long length,
+	public void append(StorageServerInfo storage, StoragePath spath, byte[] bytes,
 			Callback<Void> callback) {
-		executor.exec(storage.getAddress(), new AppendRequest(content, length, spath),
+		executor.exec(storage.getAddress(), new AppendRequest(bytes, bytes.length, spath),
+				EmptyDecoder.INSTANCE, callback);
+	}
+
+	/**
+	 * 追加文件内容
+	 * 
+	 * @param storage
+	 * @param spath
+	 * @param content
+	 * @param length
+	 * @param callback
+	 */
+	public void modify(StorageServerInfo storage, StoragePath spath, int offset, byte[] bytes,
+			Callback<Void> callback) {
+		executor.exec(storage.getAddress(), new ModifyRequest(bytes, bytes.length, spath, offset),
 				EmptyDecoder.INSTANCE, callback);
 	}
 
