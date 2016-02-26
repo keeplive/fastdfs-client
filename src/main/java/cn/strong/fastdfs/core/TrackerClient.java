@@ -11,11 +11,15 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import cn.strong.fastdfs.model.StoragePath;
 import cn.strong.fastdfs.model.StorageServerInfo;
+import cn.strong.fastdfs.request.tracker.GetDownloadStorageRequest;
 import cn.strong.fastdfs.request.tracker.GetUploadStorageRequest;
 import cn.strong.fastdfs.response.DefaultReciver;
 import cn.strong.fastdfs.response.StorageServerInfoDecoder;
+import cn.strong.fastdfs.response.StorageServerInfoListDecoder;
 import cn.strong.fastdfs.util.Callback;
+import cn.strong.fastdfs.util.Helper;
 
 /**
  * TrackerClient
@@ -53,12 +57,34 @@ public class TrackerClient {
 		return strategy.pick(seeds);
 	}
 
+	/**
+	 * 获取上传存储服务器地址
+	 * 
+	 * @param callback
+	 */
 	public void getUploadStorage(Callback<StorageServerInfo> callback) {
 		getUploadStorage(null, callback);
 	}
 
+	/**
+	 * 获取上传存储服务器地址
+	 * 
+	 * @param group
+	 * @param callback
+	 */
 	public void getUploadStorage(String group, Callback<StorageServerInfo> callback) {
 		executor.exec(pick(), new GetUploadStorageRequest(group), new DefaultReciver<>(
 				StorageServerInfoDecoder.INSTANCE), callback);
+	}
+
+	/**
+	 * 获取下载存储服务器地址
+	 * 
+	 * @param path
+	 * @param callback
+	 */
+	public void getDownloadStorage(StoragePath path, Callback<StorageServerInfo> callback) {
+		executor.exec(pick(), new GetDownloadStorageRequest(path), new DefaultReciver<>(
+				StorageServerInfoListDecoder.INSTANCE), Callback.compose(callback, Helper::first));
 	}
 }
