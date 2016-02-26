@@ -22,6 +22,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.pool.FixedChannelPool;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
+import io.netty.util.concurrent.ProgressiveFuture;
 import io.netty.util.concurrent.ProgressivePromise;
 import io.netty.util.concurrent.Promise;
 
@@ -106,7 +107,7 @@ public class FastdfsExecutor implements Closeable {
 	 * @param receiver
 	 * @return
 	 */
-	public ProgressivePromise<Void> execute(InetSocketAddress addr, Sender sender, StreamReceiver receiver) {
+	public ProgressiveFuture<Void> execute(InetSocketAddress addr, Sender sender, StreamReceiver receiver) {
 		ProgressivePromise<Void> promise = group.next().newProgressivePromise();
 		FixedChannelPool pool = poolMap.get(addr);
 		pool.acquire().addListener(new PoolChannelFutureListener<Void>(promise, pool, sender, receiver));
