@@ -11,6 +11,8 @@ import io.netty.util.concurrent.GenericFutureListener;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * 帮助类
@@ -64,6 +66,26 @@ public class Helper {
 	 */
 	public static boolean isEmpty(String content) {
 		return content == null || content.isEmpty();
+	}
+
+	/**
+	 * 判断集合是否为空
+	 * 
+	 * @param coll
+	 * @return
+	 */
+	public static <T> boolean isEmpty(Collection<T> coll) {
+		return coll == null || coll.isEmpty();
+	}
+
+	/**
+	 * 获取列表头元素
+	 * 
+	 * @param list
+	 * @return
+	 */
+	public static <T> T first(List<T> list) {
+		return isEmpty(list) ? null : list.get(0);
 	}
 
 	/**
