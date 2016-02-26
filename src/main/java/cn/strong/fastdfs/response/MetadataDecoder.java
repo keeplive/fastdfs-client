@@ -7,7 +7,7 @@ import static cn.strong.fastdfs.core.Consts.FDFS_FIELD_SEPERATOR;
 import static cn.strong.fastdfs.core.Consts.FDFS_RECORD_SEPERATOR;
 import static cn.strong.fastdfs.util.Helper.readString;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import io.netty.buffer.ByteBuf;
@@ -23,7 +23,7 @@ public enum MetadataDecoder implements ResponseDecoder<Map<String, String>> {
 
 	@Override
 	public Map<String, String> decode(ByteBuf buf) {
-		Map<String, String> result = new HashMap<String, String>();
+		Map<String, String> result = new LinkedHashMap<String, String>();
 		String content = readString(buf);
 		String[] pairs = content.split(FDFS_RECORD_SEPERATOR);
 		for (String pair : pairs) {
