@@ -3,15 +3,15 @@
  */
 package cn.strong.fastdfs.response;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.util.concurrent.Promise;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.channels.GatheringByteChannel;
 import java.util.Objects;
 
 import cn.strong.fastdfs.core.FastdfsException;
+import io.netty.buffer.ByteBuf;
+import io.netty.util.concurrent.ProgressivePromise;
+import io.netty.util.concurrent.Promise;
 
 /**
  * 流接收处理器
@@ -59,6 +59,10 @@ public class StreamReceiver extends AbstractReceiver<Void> {
 
 			if (readed >= length) {
 				promise.setSuccess(null);
+			} else {
+				if (promise instanceof ProgressivePromise) {
+					((ProgressivePromise<Void>) promise).setProgress(readed, length);
+				}
 			}
 		} catch (IOException e) {
 			throw new FastdfsException("write response to output error.", e);
