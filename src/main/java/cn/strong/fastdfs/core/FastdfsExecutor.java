@@ -6,6 +6,7 @@ package cn.strong.fastdfs.core;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.function.Function;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -66,6 +67,45 @@ public class FastdfsExecutor implements Closeable {
 		return promise;
 	}
 
+	/**
+	 * 访问 Fastdfs 服务器，并对返回的结果进行转换
+	 * 
+	 * @param addr
+	 * @param sender
+	 * @param decoder
+	 * @param transformer
+	 * @return
+	 */
+	public <S, T> Future<T> execute(InetSocketAddress addr, Sender sender, ResponseDecoder<S> decoder,
+			Function<S, T> transformer) {
+		Promise<T> promise = group.next().newPromise();
+		Future<S> sf = execute(addr, sender, decoder);
+		sf.addListener(new FutureListener<S>() {
+
+			@Override
+			public void operationComplete(Future<S> future) throws Exception {
+				if (!future.isSuccess()) {
+					promise.setFailure(future.cause());
+				} else {
+					try {
+						promise.setSuccess(transformer.apply(future.getNow()));
+					} catch (Exception e) {
+						promise.tryFailure(e);
+					}
+				}
+			}
+		});
+		return promise;
+	}
+
+	/**
+	 * 访问 Fastdfs 服务器，并获取流式结果
+	 * 
+	 * @param addr
+	 * @param sender
+	 * @param receiver
+	 * @return
+	 */
 	public ProgressivePromise<Void> execute(InetSocketAddress addr, Sender sender, StreamReceiver receiver) {
 		ProgressivePromise<Void> promise = group.next().newProgressivePromise();
 		FixedChannelPool pool = poolMap.get(addr);
