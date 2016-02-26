@@ -65,4 +65,23 @@ public class TrackerClientIT {
 		latch.await();
 	}
 
+	@Test
+	@Ignore
+	public void testFindDownloadStorages() throws InterruptedException {
+		StoragePath spath = StoragePath
+				.fromFullPath("group1/M00/09/FE/wKgURFbQBVSAcFjdAAAADTVhaBw216.inf");
+		CountDownLatch latch = new CountDownLatch(1);
+		client.findDownloadStorages(spath, (infos, ex) -> {
+			if (ex != null) {
+				System.out.println("error: " + ex);
+			} else {
+				infos.forEach(info -> {
+					System.out.println(info);
+				});
+			}
+			latch.countDown();
+		});
+		latch.await();
+	}
+
 }

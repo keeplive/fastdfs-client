@@ -13,10 +13,10 @@ import org.slf4j.LoggerFactory;
 
 import cn.strong.fastdfs.model.StoragePath;
 import cn.strong.fastdfs.model.StorageServerInfo;
+import cn.strong.fastdfs.request.tracker.FindDownloadStoragesRequest;
 import cn.strong.fastdfs.request.tracker.GetDownloadStorageRequest;
 import cn.strong.fastdfs.request.tracker.GetUpdateStorageRequest;
 import cn.strong.fastdfs.request.tracker.GetUploadStorageRequest;
-import cn.strong.fastdfs.response.DefaultReciver;
 import cn.strong.fastdfs.response.StorageServerInfoDecoder;
 import cn.strong.fastdfs.response.StorageServerInfoListDecoder;
 import cn.strong.fastdfs.util.Callback;
@@ -74,8 +74,8 @@ public class TrackerClient {
 	 * @param callback
 	 */
 	public void getUploadStorage(String group, Callback<StorageServerInfo> callback) {
-		executor.exec(pick(), new GetUploadStorageRequest(group), new DefaultReciver<>(
-				StorageServerInfoDecoder.INSTANCE), callback);
+		executor.exec(pick(), new GetUploadStorageRequest(group),
+				StorageServerInfoDecoder.INSTANCE, callback);
 	}
 
 	/**
@@ -85,8 +85,8 @@ public class TrackerClient {
 	 * @param callback
 	 */
 	public void getDownloadStorage(StoragePath path, Callback<StorageServerInfo> callback) {
-		executor.exec(pick(), new GetDownloadStorageRequest(path), new DefaultReciver<>(
-				StorageServerInfoListDecoder.INSTANCE), Callback.compose(callback, Helper::first));
+		executor.exec(pick(), new GetDownloadStorageRequest(path),
+				StorageServerInfoListDecoder.INSTANCE, Callback.compose(callback, Helper::first));
 	}
 
 	/**
@@ -96,7 +96,18 @@ public class TrackerClient {
 	 * @param callback
 	 */
 	public void getUpdateStorage(StoragePath path, Callback<StorageServerInfo> callback) {
-		executor.exec(pick(), new GetUpdateStorageRequest(path), new DefaultReciver<>(
-				StorageServerInfoListDecoder.INSTANCE), Callback.compose(callback, Helper::first));
+		executor.exec(pick(), new GetUpdateStorageRequest(path),
+				StorageServerInfoListDecoder.INSTANCE, Callback.compose(callback, Helper::first));
+	}
+
+	/**
+	 * 请求 tracker 获取所有可用的下载 storage 地址列表
+	 * 
+	 * @param path
+	 * @return
+	 */
+	public void findDownloadStorages(StoragePath path, Callback<List<StorageServerInfo>> callback) {
+		executor.exec(pick(), new FindDownloadStoragesRequest(path),
+				StorageServerInfoListDecoder.INSTANCE, callback);
 	}
 }
