@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import cn.strong.fastdfs.model.StoragePath;
 import cn.strong.fastdfs.model.StorageServerInfo;
 import cn.strong.fastdfs.request.tracker.GetDownloadStorageRequest;
+import cn.strong.fastdfs.request.tracker.GetUpdateStorageRequest;
 import cn.strong.fastdfs.request.tracker.GetUploadStorageRequest;
 import cn.strong.fastdfs.response.DefaultReciver;
 import cn.strong.fastdfs.response.StorageServerInfoDecoder;
@@ -85,6 +86,17 @@ public class TrackerClient {
 	 */
 	public void getDownloadStorage(StoragePath path, Callback<StorageServerInfo> callback) {
 		executor.exec(pick(), new GetDownloadStorageRequest(path), new DefaultReciver<>(
+				StorageServerInfoListDecoder.INSTANCE), Callback.compose(callback, Helper::first));
+	}
+
+	/**
+	 * 获取更新存储服务器地址
+	 * 
+	 * @param path
+	 * @param callback
+	 */
+	public void getUpdateStorage(StoragePath path, Callback<StorageServerInfo> callback) {
+		executor.exec(pick(), new GetUpdateStorageRequest(path), new DefaultReciver<>(
 				StorageServerInfoListDecoder.INSTANCE), Callback.compose(callback, Helper::first));
 	}
 }
