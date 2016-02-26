@@ -61,7 +61,6 @@ public class TrackerClient {
 	/**
 	 * 获取上传存储服务器地址
 	 * 
-	 * @param callback
 	 */
 	public Future<StorageServerInfo> getUploadStorage() {
 		return getUploadStorage(null);
@@ -71,7 +70,6 @@ public class TrackerClient {
 	 * 获取上传存储服务器地址
 	 * 
 	 * @param group
-	 * @param callback
 	 */
 	public Future<StorageServerInfo> getUploadStorage(String group) {
 		return executor.execute(pick(), 
@@ -83,7 +81,6 @@ public class TrackerClient {
 	 * 获取下载存储服务器地址
 	 * 
 	 * @param path
-	 * @param callback
 	 */
 	public Future<StorageServerInfo> getDownloadStorage(StoragePath path) {
 		return executor.execute(pick(), 
@@ -96,7 +93,6 @@ public class TrackerClient {
 	 * 获取更新存储服务器地址
 	 * 
 	 * @param path
-	 * @param callback
 	 */
 	public Future<StorageServerInfo> getUpdateStorage(StoragePath path) {
 		return executor.execute(pick(), 
