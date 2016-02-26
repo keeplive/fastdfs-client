@@ -3,6 +3,12 @@
  */
 package cn.strong.fastdfs.core;
 
+import java.net.InetSocketAddress;
+import java.util.Objects;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
@@ -12,12 +18,6 @@ import io.netty.channel.pool.ChannelPoolHandler;
 import io.netty.channel.pool.FixedChannelPool;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.stream.ChunkedWriteHandler;
-
-import java.net.InetSocketAddress;
-import java.util.Objects;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Fastdfs 连接池组
@@ -34,12 +34,8 @@ public class FastdfsChannelPoolMap extends
 	private FastdfsSettings settings;
 
 	public FastdfsChannelPoolMap(EventLoopGroup group, FastdfsSettings settings) {
-		Objects.requireNonNull(group);
-		this.group = group;
-		if (settings == null) {
-			settings = new FastdfsSettings();
-		}
-		this.settings = settings;
+		this.group = Objects.requireNonNull(group);
+		this.settings = Objects.requireNonNull(settings);
 	}
 
 	public void setGroup(EventLoopGroup group) {

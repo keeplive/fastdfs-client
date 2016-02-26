@@ -12,9 +12,18 @@ package cn.strong.fastdfs.core;
  */
 public class FastdfsSettings {
 
+	private int eventLoopThreads = 0;
 	private int maxConnPerHost = 10;
 	private int connectTimeout = 10000;
 	private boolean keepAlive = true;
+
+	public int getEventLoopThreads() {
+		return eventLoopThreads;
+	}
+
+	public void setEventLoopThreads(int eventLoopThreads) {
+		this.eventLoopThreads = eventLoopThreads;
+	}
 
 	public int getMaxConnPerHost() {
 		return maxConnPerHost;
