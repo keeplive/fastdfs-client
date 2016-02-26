@@ -6,19 +6,33 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import cn.strong.fastdfs.util.Helper;
 
 public class TrackerClientIT {
 
-	@Test
-	public void testGetUploadStorageString() throws InterruptedException, IOException {
-		FastdfsExecutor session = new FastdfsExecutor();
-		session.afterPropertiesSet();
+	private FastdfsExecutor executor;
+	private TrackerClient client;
+
+	@Before
+	public void setup() {
+		executor = new FastdfsExecutor();
+		executor.afterPropertiesSet();
 		List<InetSocketAddress> seeds = Arrays
 				.asList(new InetSocketAddress("192.168.20.68", 22122));
-		TrackerClient client = new TrackerClient(session, seeds);
+		client = new TrackerClient(executor, seeds);
+	}
+
+	@After
+	public void destroy() {
+		Helper.closeQuietly(executor);
+	}
+
+	@Test
+	public void testGetUploadStorageString() throws InterruptedException, IOException {
 		CountDownLatch latch = new CountDownLatch(1);
 		client.getUploadStorage("group1", (info, ex) -> {
 			if (ex != null) {
@@ -27,7 +41,6 @@ public class TrackerClientIT {
 				System.out.println(info);
 			}
 			latch.countDown();
-			Helper.closeQuietly(session);
 		});
 		latch.await();
 	}
