@@ -6,9 +6,9 @@ package cn.strong.fastdfs.core;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.Objects;
 import java.util.function.Function;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import cn.strong.fastdfs.core.FastdfsClientHandler.Operation;
@@ -37,17 +37,8 @@ public class FastdfsExecutor implements Closeable {
 	private NioEventLoopGroup group;
 	private FastdfsChannelPoolMap poolMap;
 
-	private FastdfsSettings settings;
-
-	public void setSettings(FastdfsSettings settings) {
-		this.settings = settings;
-	}
-
-	@PostConstruct
-	public void afterPropertiesSet() {
-		if (settings == null) {
-			settings = new FastdfsSettings();
-		}
+	public FastdfsExecutor(FastdfsSettings settings) {
+		Objects.requireNonNull(settings);
 		group = new NioEventLoopGroup(settings.getEventLoopThreads());
 		poolMap = new FastdfsChannelPoolMap(group, settings);
 	}
