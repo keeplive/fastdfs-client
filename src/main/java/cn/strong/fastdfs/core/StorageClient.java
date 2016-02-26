@@ -45,7 +45,9 @@ public class StorageClient {
 	 * 上传文件
 	 * 
 	 * @param storage
+	 *            存储服务器信息，应该由 tracker 查询得到
 	 * @param file
+	 *            文件
 	 * @return
 	 */
 	public Future<StoragePath> upload(StorageServerInfo storage, File file) {
@@ -68,7 +70,7 @@ public class StorageClient {
 	 * </ul>
 	 * 
 	 * @param storage
-	 *            存储服务器信息
+	 *            存储服务器信息，应该由 tracker 查询得到
 	 * @param content
 	 *            上传内容
 	 * @param size
@@ -86,7 +88,9 @@ public class StorageClient {
 	 * 上传可追加文件内容
 	 * 
 	 * @param storage
+	 *            存储服务器信息，应该由 tracker 查询得到
 	 * @param file
+	 *            文件
 	 */
 	public Future<StoragePath> uploadAppender(StorageServerInfo storage, File file) {
 		return executor.execute(storage.getAddress(),
@@ -108,7 +112,7 @@ public class StorageClient {
 	 * </ul>
 	 * 
 	 * @param storage
-	 *            存储服务器信息
+	 *            存储服务器信息，应该由 tracker 查询得到
 	 * @param content
 	 *            上传内容
 	 * @param size
@@ -126,9 +130,12 @@ public class StorageClient {
 	 * 追加文件内容
 	 * 
 	 * @param storage
+	 *            存储服务器信息，应该由 tracker 查询得到
 	 * @param spath
-	 * @param content
-	 * @param length
+	 *            服务器存储路径
+	 * @param bytes
+	 *            内容字节数组
+	 * @return
 	 */
 	public Future<Void> append(StorageServerInfo storage, StoragePath spath, byte[] bytes) {
 		return executor.execute(storage.getAddress(), new AppendRequest(bytes, bytes.length, spath),
@@ -136,12 +143,17 @@ public class StorageClient {
 	}
 
 	/**
-	 * 追加文件内容
+	 * 修改文件内容
 	 * 
 	 * @param storage
+	 *            存储服务器信息，应该由 tracker 查询得到
 	 * @param spath
-	 * @param content
-	 * @param length
+	 *            服务器存储路径
+	 * @param offset
+	 *            偏移量
+	 * @param bytes
+	 *            内容字节数组
+	 * @return
 	 */
 	public Future<Void> modify(StorageServerInfo storage, StoragePath spath, int offset, byte[] bytes) {
 		return executor.execute(storage.getAddress(), new ModifyRequest(bytes, bytes.length, spath, offset),
@@ -152,7 +164,9 @@ public class StorageClient {
 	 * 删除文件
 	 * 
 	 * @param storage
+	 *            存储服务器信息，应该由 tracker 查询得到
 	 * @param spath
+	 *            服务器存储路径
 	 */
 	public Future<Void> delete(StorageServerInfo storage, StoragePath spath) {
 		return executor.execute(storage.getAddress(), new DeleteRequest(spath), EmptyDecoder.INSTANCE);
@@ -162,7 +176,9 @@ public class StorageClient {
 	 * 截取文件
 	 * 
 	 * @param storage
+	 *            存储服务器信息，应该由 tracker 查询得到
 	 * @param spath
+	 *            服务器存储路径
 	 */
 	public Future<Void> truncate(StorageServerInfo storage, StoragePath spath) {
 		return truncate(storage, spath, 0);
@@ -172,8 +188,11 @@ public class StorageClient {
 	 * 截取文件
 	 * 
 	 * @param storage
+	 *            存储服务器信息，应该由 tracker 查询得到
 	 * @param spath
+	 *            服务器存储路径
 	 * @param truncatedSize
+	 *            截取文件大小
 	 */
 	public Future<Void> truncate(StorageServerInfo storage, StoragePath spath, int truncatedSize) {
 		return executor.execute(storage.getAddress(), new TruncateRequest(spath, truncatedSize),
@@ -189,21 +208,31 @@ public class StorageClient {
 	 * </ul>
 	 * 
 	 * @param storage
+	 *            存储服务器信息，应该由 tracker 查询得到
 	 * @param spath
+	 *            服务器存储路径
 	 * @param output
+	 *            输出流
+	 * @return 下载进度
 	 */
 	public ProgressiveFuture<Void> download(StorageServerInfo storage, StoragePath spath, Object output) {
 		return download(storage, spath, DEFAULT_OFFSET, SIZE_UNLIMIT, output);
 	}
 
 	/**
-	 * 下载文件
+	 * 下载文件内容
 	 * 
 	 * @param storage
+	 *            存储服务器信息，应该由 tracker 查询得到
 	 * @param spath
+	 *            服务器存储路径
 	 * @param offset
+	 *            字节偏移量
 	 * @param size
+	 *            下载字节数
 	 * @param output
+	 *            输出流
+	 * @return 下载进度
 	 */
 	public ProgressiveFuture<Void> download(StorageServerInfo storage, StoragePath spath, int offset, int size,
 			Object output) {
