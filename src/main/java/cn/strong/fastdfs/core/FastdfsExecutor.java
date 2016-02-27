@@ -6,8 +6,6 @@ package cn.strong.fastdfs.core;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.Objects;
-import java.util.function.Function;
 
 import javax.annotation.PreDestroy;
 
@@ -17,17 +15,19 @@ import cn.strong.fastdfs.response.DefaultReciver;
 import cn.strong.fastdfs.response.Receiver;
 import cn.strong.fastdfs.response.ResponseDecoder;
 import cn.strong.fastdfs.response.StreamReceiver;
+import cn.strong.fastdfs.util.AsyncAction;
+import cn.strong.fastdfs.util.AsyncActions;
+import cn.strong.fastdfs.util.ProgressiveFutureAsyncAction;
 import io.netty.channel.Channel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.pool.FixedChannelPool;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
-import io.netty.util.concurrent.ProgressiveFuture;
 import io.netty.util.concurrent.ProgressivePromise;
 import io.netty.util.concurrent.Promise;
 
 /**
- * FastdfsSession 连接
+ * FastdfsExecutor
  * 
  * @author liulongbiao
  *
@@ -38,7 +38,9 @@ public class FastdfsExecutor implements Closeable {
 	private FastdfsChannelPoolMap poolMap;
 
 	public FastdfsExecutor(FastdfsSettings settings) {
-		Objects.requireNonNull(settings);
+		if (settings == null) {
+			settings = new FastdfsSettings();
+		}
 		group = new NioEventLoopGroup(settings.getEventLoopThreads());
 		poolMap = new FastdfsChannelPoolMap(group, settings);
 	}
@@ -51,45 +53,15 @@ public class FastdfsExecutor implements Closeable {
 	 * @param decoder
 	 * @return
 	 */
-	public <T> Future<T> execute(InetSocketAddress addr, Sender sender, ResponseDecoder<T> decoder) {
+	public <T> AsyncAction<T> execute(InetSocketAddress addr, Sender sender, ResponseDecoder<T> decoder) {
 		Promise<T> promise = group.next().newPromise();
 		execute(addr, sender, new DefaultReciver<>(decoder), promise);
-		return promise;
+		return AsyncActions.from(promise);
 	}
 
 	public <T> void execute(InetSocketAddress addr, Sender sender, Receiver<T> receiver, Promise<T> promise) {
 		FixedChannelPool pool = poolMap.get(addr);
 		pool.acquire().addListener(new PoolChannelFutureListener<T>(promise, pool, sender, receiver));
-	}
-
-	/**
-	 * 访问 Fastdfs 服务器，并对返回的结果进行转换
-	 * 
-	 * @param addr
-	 * @param sender
-	 * @param decoder
-	 * @param transformer
-	 * @return
-	 */
-	public <S, T> Future<T> execute(InetSocketAddress addr, Sender sender, ResponseDecoder<S> decoder,
-			Function<S, T> transformer) {
-		Promise<T> promise = group.next().newPromise();
-		execute(addr, sender, decoder).addListener(new FutureListener<S>() {
-
-			@Override
-			public void operationComplete(Future<S> future) throws Exception {
-				if (!future.isSuccess()) {
-					promise.setFailure(future.cause());
-				} else {
-					try {
-						promise.setSuccess(transformer.apply(future.getNow()));
-					} catch (Exception e) {
-						promise.tryFailure(e);
-					}
-				}
-			}
-		});
-		return promise;
 	}
 
 	/**
@@ -100,10 +72,10 @@ public class FastdfsExecutor implements Closeable {
 	 * @param receiver
 	 * @return
 	 */
-	public ProgressiveFuture<Void> execute(InetSocketAddress addr, Sender sender, StreamReceiver receiver) {
+	public ProgressiveFutureAsyncAction<Void> execute(InetSocketAddress addr, Sender sender, StreamReceiver receiver) {
 		ProgressivePromise<Void> promise = group.next().newProgressivePromise();
 		execute(addr, sender, receiver, promise);
-		return promise;
+		return AsyncActions.from(promise);
 	}
 
 	private static class PoolChannelFutureListener<T> implements FutureListener<Channel> {
