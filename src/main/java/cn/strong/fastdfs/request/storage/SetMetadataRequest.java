@@ -24,7 +24,7 @@ import io.netty.channel.Channel;
 /**
  * 设置文件属性请求
  * 
- * @author yoyobill
+ * @author liulongbiao
  *
  */
 public class SetMetadataRequest implements Sender {
