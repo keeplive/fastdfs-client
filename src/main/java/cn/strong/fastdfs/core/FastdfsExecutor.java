@@ -53,10 +53,13 @@ public class FastdfsExecutor implements Closeable {
 	 */
 	public <T> Future<T> execute(InetSocketAddress addr, Sender sender, ResponseDecoder<T> decoder) {
 		Promise<T> promise = group.next().newPromise();
-		FixedChannelPool pool = poolMap.get(addr);
-		pool.acquire()
-				.addListener(new PoolChannelFutureListener<T>(promise, pool, sender, new DefaultReciver<>(decoder)));
+		execute(addr, sender, new DefaultReciver<>(decoder), promise);
 		return promise;
+	}
+
+	public <T> void execute(InetSocketAddress addr, Sender sender, Receiver<T> receiver, Promise<T> promise) {
+		FixedChannelPool pool = poolMap.get(addr);
+		pool.acquire().addListener(new PoolChannelFutureListener<T>(promise, pool, sender, receiver));
 	}
 
 	/**
@@ -71,8 +74,7 @@ public class FastdfsExecutor implements Closeable {
 	public <S, T> Future<T> execute(InetSocketAddress addr, Sender sender, ResponseDecoder<S> decoder,
 			Function<S, T> transformer) {
 		Promise<T> promise = group.next().newPromise();
-		Future<S> sf = execute(addr, sender, decoder);
-		sf.addListener(new FutureListener<S>() {
+		execute(addr, sender, decoder).addListener(new FutureListener<S>() {
 
 			@Override
 			public void operationComplete(Future<S> future) throws Exception {
@@ -100,8 +102,7 @@ public class FastdfsExecutor implements Closeable {
 	 */
 	public ProgressiveFuture<Void> execute(InetSocketAddress addr, Sender sender, StreamReceiver receiver) {
 		ProgressivePromise<Void> promise = group.next().newProgressivePromise();
-		FixedChannelPool pool = poolMap.get(addr);
-		pool.acquire().addListener(new PoolChannelFutureListener<Void>(promise, pool, sender, receiver));
+		execute(addr, sender, receiver, promise);
 		return promise;
 	}
 
