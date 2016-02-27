@@ -19,8 +19,8 @@ import cn.strong.fastdfs.request.tracker.GetUpdateStorageRequest;
 import cn.strong.fastdfs.request.tracker.GetUploadStorageRequest;
 import cn.strong.fastdfs.response.StorageServerInfoDecoder;
 import cn.strong.fastdfs.response.StorageServerInfoListDecoder;
+import cn.strong.fastdfs.util.AsyncAction;
 import cn.strong.fastdfs.util.Helper;
-import io.netty.util.concurrent.Future;
 
 /**
  * TrackerClient
@@ -62,7 +62,7 @@ public class TrackerClient {
 	 * 获取上传存储服务器地址
 	 * 
 	 */
-	public Future<StorageServerInfo> getUploadStorage() {
+	public AsyncAction<StorageServerInfo> getUploadStorage() {
 		return getUploadStorage(null);
 	}
 
@@ -71,10 +71,8 @@ public class TrackerClient {
 	 * 
 	 * @param group
 	 */
-	public Future<StorageServerInfo> getUploadStorage(String group) {
-		return executor.execute(pick(), 
-				new GetUploadStorageRequest(group), 
-				StorageServerInfoDecoder.INSTANCE);
+	public AsyncAction<StorageServerInfo> getUploadStorage(String group) {
+		return executor.execute(pick(), new GetUploadStorageRequest(group), StorageServerInfoDecoder.INSTANCE);
 	}
 
 	/**
@@ -82,11 +80,9 @@ public class TrackerClient {
 	 * 
 	 * @param path
 	 */
-	public Future<StorageServerInfo> getDownloadStorage(StoragePath path) {
-		return executor.execute(pick(), 
-				new GetDownloadStorageRequest(path), 
-				StorageServerInfoListDecoder.INSTANCE,
-				Helper::first);
+	public AsyncAction<StorageServerInfo> getDownloadStorage(StoragePath path) {
+		return executor.execute(pick(), new GetDownloadStorageRequest(path), StorageServerInfoListDecoder.INSTANCE)
+				.map(Helper::first);
 	}
 
 	/**
@@ -94,11 +90,9 @@ public class TrackerClient {
 	 * 
 	 * @param path
 	 */
-	public Future<StorageServerInfo> getUpdateStorage(StoragePath path) {
-		return executor.execute(pick(), 
-				new GetUpdateStorageRequest(path), 
-				StorageServerInfoListDecoder.INSTANCE,
-				Helper::first);
+	public AsyncAction<StorageServerInfo> getUpdateStorage(StoragePath path) {
+		return executor.execute(pick(), new GetUpdateStorageRequest(path), StorageServerInfoListDecoder.INSTANCE)
+				.map(Helper::first);
 	}
 
 	/**
@@ -107,7 +101,7 @@ public class TrackerClient {
 	 * @param path
 	 * @return
 	 */
-	public Future<List<StorageServerInfo>> findDownloadStorages(StoragePath path) {
+	public AsyncAction<List<StorageServerInfo>> findDownloadStorages(StoragePath path) {
 		return executor.execute(pick(), 
 				new FindDownloadStoragesRequest(path), 
 				StorageServerInfoListDecoder.INSTANCE);

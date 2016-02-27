@@ -7,9 +7,9 @@ import static cn.strong.fastdfs.request.storage.DownloadRequest.DEFAULT_OFFSET;
 import static cn.strong.fastdfs.request.storage.DownloadRequest.SIZE_UNLIMIT;
 
 import java.io.File;
-import java.util.Map;
 import java.util.Objects;
 
+import cn.strong.fastdfs.model.Metadata;
 import cn.strong.fastdfs.model.StoragePath;
 import cn.strong.fastdfs.model.StorageServerInfo;
 import cn.strong.fastdfs.request.storage.AppendRequest;
@@ -25,8 +25,8 @@ import cn.strong.fastdfs.response.EmptyDecoder;
 import cn.strong.fastdfs.response.MetadataDecoder;
 import cn.strong.fastdfs.response.StoragePathDecoder;
 import cn.strong.fastdfs.response.StreamReceiver;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.ProgressiveFuture;
+import cn.strong.fastdfs.util.AsyncAction;
+import cn.strong.fastdfs.util.ProgressiveFutureAsyncAction;
 
 /**
  * StorageClient
@@ -50,7 +50,7 @@ public class StorageClient {
 	 *            文件
 	 * @return
 	 */
-	public Future<StoragePath> upload(StorageServerInfo storage, File file) {
+	public AsyncAction<StoragePath> upload(StorageServerInfo storage, File file) {
 		return executor.execute(storage.getAddress(), 
 				new UploadRequest(file, storage.storePathIndex),
 				StoragePathDecoder.INSTANCE);
@@ -78,7 +78,7 @@ public class StorageClient {
 	 * @param ext
 	 *            扩展名
 	 */
-	public Future<StoragePath> upload(StorageServerInfo storage, Object content, long size, String ext) {
+	public AsyncAction<StoragePath> upload(StorageServerInfo storage, Object content, long size, String ext) {
 		return executor.execute(storage.getAddress(),
 				new UploadRequest(content, size, ext, storage.storePathIndex),
 				StoragePathDecoder.INSTANCE);
@@ -92,7 +92,7 @@ public class StorageClient {
 	 * @param file
 	 *            文件
 	 */
-	public Future<StoragePath> uploadAppender(StorageServerInfo storage, File file) {
+	public AsyncAction<StoragePath> uploadAppender(StorageServerInfo storage, File file) {
 		return executor.execute(storage.getAddress(),
 				new UploadAppenderRequest(file, storage.storePathIndex),
 				StoragePathDecoder.INSTANCE);
@@ -120,7 +120,7 @@ public class StorageClient {
 	 * @param ext
 	 *            扩展名
 	 */
-	public Future<StoragePath> uploadAppender(StorageServerInfo storage, Object content, long size, String ext) {
+	public AsyncAction<StoragePath> uploadAppender(StorageServerInfo storage, Object content, long size, String ext) {
 		return executor.execute(storage.getAddress(), 
 				new UploadAppenderRequest(content, size, ext, storage.storePathIndex),
 				StoragePathDecoder.INSTANCE);
@@ -137,7 +137,7 @@ public class StorageClient {
 	 *            内容字节数组
 	 * @return
 	 */
-	public Future<Void> append(StorageServerInfo storage, StoragePath spath, byte[] bytes) {
+	public AsyncAction<Void> append(StorageServerInfo storage, StoragePath spath, byte[] bytes) {
 		return executor.execute(storage.getAddress(), new AppendRequest(bytes, bytes.length, spath),
 				EmptyDecoder.INSTANCE);
 	}
@@ -155,7 +155,7 @@ public class StorageClient {
 	 *            内容字节数组
 	 * @return
 	 */
-	public Future<Void> modify(StorageServerInfo storage, StoragePath spath, int offset, byte[] bytes) {
+	public AsyncAction<Void> modify(StorageServerInfo storage, StoragePath spath, int offset, byte[] bytes) {
 		return executor.execute(storage.getAddress(), new ModifyRequest(bytes, bytes.length, spath, offset),
 				EmptyDecoder.INSTANCE);
 	}
@@ -168,7 +168,7 @@ public class StorageClient {
 	 * @param spath
 	 *            服务器存储路径
 	 */
-	public Future<Void> delete(StorageServerInfo storage, StoragePath spath) {
+	public AsyncAction<Void> delete(StorageServerInfo storage, StoragePath spath) {
 		return executor.execute(storage.getAddress(), new DeleteRequest(spath), EmptyDecoder.INSTANCE);
 	}
 
@@ -180,7 +180,7 @@ public class StorageClient {
 	 * @param spath
 	 *            服务器存储路径
 	 */
-	public Future<Void> truncate(StorageServerInfo storage, StoragePath spath) {
+	public AsyncAction<Void> truncate(StorageServerInfo storage, StoragePath spath) {
 		return truncate(storage, spath, 0);
 	}
 
@@ -194,7 +194,7 @@ public class StorageClient {
 	 * @param truncatedSize
 	 *            截取文件大小
 	 */
-	public Future<Void> truncate(StorageServerInfo storage, StoragePath spath, int truncatedSize) {
+	public AsyncAction<Void> truncate(StorageServerInfo storage, StoragePath spath, int truncatedSize) {
 		return executor.execute(storage.getAddress(), new TruncateRequest(spath, truncatedSize),
 				EmptyDecoder.INSTANCE);
 	}
@@ -215,7 +215,7 @@ public class StorageClient {
 	 *            输出流
 	 * @return 下载进度
 	 */
-	public ProgressiveFuture<Void> download(StorageServerInfo storage, StoragePath spath, Object output) {
+	public ProgressiveFutureAsyncAction<Void> download(StorageServerInfo storage, StoragePath spath, Object output) {
 		return download(storage, spath, DEFAULT_OFFSET, SIZE_UNLIMIT, output);
 	}
 
@@ -234,8 +234,8 @@ public class StorageClient {
 	 *            输出流
 	 * @return 下载进度
 	 */
-	public ProgressiveFuture<Void> download(StorageServerInfo storage, StoragePath spath, int offset, int size,
-			Object output) {
+	public ProgressiveFutureAsyncAction<Void> download(StorageServerInfo storage, StoragePath spath, int offset,
+			int size, Object output) {
 		return executor.execute(storage.getAddress(), new DownloadRequest(spath, offset, size),
 				StreamReceiver.newInstance(output));
 	}
@@ -253,7 +253,7 @@ public class StorageClient {
 	 *            设置标识
 	 * @return
 	 */
-	public Future<Void> setMetadata(StorageServerInfo storage, StoragePath spath, Map<String, String> metadata,
+	public AsyncAction<Void> setMetadata(StorageServerInfo storage, StoragePath spath, Metadata metadata,
 			byte flag) {
 		return executor.execute(storage.getAddress(), new SetMetadataRequest(spath, metadata, flag),
 				EmptyDecoder.INSTANCE);
@@ -268,7 +268,7 @@ public class StorageClient {
 	 *            服务器存储路径
 	 * @return
 	 */
-	public Future<Map<String, String>> getMetadata(StorageServerInfo storage, StoragePath path) {
+	public AsyncAction<Metadata> getMetadata(StorageServerInfo storage, StoragePath path) {
 		return executor.execute(storage.getAddress(), new GetMetadataRequest(path), MetadataDecoder.INSTANCE);
 	}
 }
