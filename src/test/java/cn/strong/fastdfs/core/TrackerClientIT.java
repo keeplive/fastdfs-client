@@ -11,7 +11,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import cn.strong.fastdfs.model.StoragePath;
-import cn.strong.fastdfs.model.StorageServerInfo;
 import cn.strong.fastdfs.util.Helper;
 
 public class TrackerClientIT {
@@ -35,13 +34,13 @@ public class TrackerClientIT {
 	@Test
 	@Ignore
 	public void testGetUploadStorageString() throws InterruptedException, IOException {
-		client.getUploadStorage("group1").addListener(f -> {
-			if (f.isSuccess()) {
-				System.out.println(f.getNow());
+		client.getUploadStorage("group1").action((info, ex) -> {
+			if(ex != null) {
+				ex.printStackTrace();
 			} else {
-				f.cause().printStackTrace();
+				System.out.println(info);
 			}
-		}).await();
+		});
 	}
 
 	@Test
@@ -49,13 +48,13 @@ public class TrackerClientIT {
 	public void testGetDownloadStorage() throws InterruptedException {
 		StoragePath spath = StoragePath
 				.fromFullPath("group1/M00/09/FE/wKgURFbQBVSAcFjdAAAADTVhaBw216.inf");
-		client.getDownloadStorage(spath).addListener(f -> {
-			if (f.isSuccess()) {
-				System.out.println(f.getNow());
+		client.getDownloadStorage(spath).action((info, ex) -> {
+			if (ex != null) {
+				ex.printStackTrace();
 			} else {
-				f.cause().printStackTrace();
+				System.out.println(info);
 			}
-		}).await();
+		});
 	}
 
 	@Test
@@ -63,17 +62,15 @@ public class TrackerClientIT {
 	public void testFindDownloadStorages() throws InterruptedException {
 		StoragePath spath = StoragePath
 				.fromFullPath("group1/M00/09/FE/wKgURFbQBVSAcFjdAAAADTVhaBw216.inf");
-		client.findDownloadStorages(spath).addListener(f -> {
-			if (f.isSuccess()) {
-				@SuppressWarnings("unchecked")
-				List<StorageServerInfo> infos = (List<StorageServerInfo>) f.getNow();
+		client.findDownloadStorages(spath).action((infos, ex) -> {
+			if (ex != null) {
+				ex.printStackTrace();
+			} else {
 				infos.forEach(info -> {
 					System.out.println(info);
 				});
-			} else {
-				f.cause().printStackTrace();
 			}
-		}).await();
+		});
 	}
 
 }

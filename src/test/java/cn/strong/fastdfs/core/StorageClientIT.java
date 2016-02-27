@@ -42,13 +42,13 @@ public class StorageClientIT {
 	@Ignore
 	public void testUploadFile() throws InterruptedException, IOException {
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
-		client.upload(info, new File("pom.xml")).addListener(f -> {
-			if (f.isSuccess()) {
-				System.out.println(f.getNow());
+		client.upload(info, new File("pom.xml")).action((a, ex) -> {
+			if (ex != null) {
+				ex.printStackTrace();
 			} else {
-				f.cause().printStackTrace();
+				System.out.println(a);
 			}
-		}).await();
+		});
 	}
 
 	@Test
@@ -57,13 +57,13 @@ public class StorageClientIT {
 		File file = new File("pom.xml");
 		InputStream input = new FileInputStream(file);
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
-		client.upload(info, input, file.length(), Helper.getFileExt(file.getName())).addListener(f -> {
-			if (f.isSuccess()) {
-				System.out.println(f.getNow());
+		client.upload(info, input, file.length(), Helper.getFileExt(file.getName())).action((a, ex) -> {
+			if (ex != null) {
+				ex.printStackTrace();
 			} else {
-				f.cause().printStackTrace();
+				System.out.println(a);
 			}
-		}).await();
+		});
 	}
 
 	@Test
@@ -71,13 +71,13 @@ public class StorageClientIT {
 	public void testUploadBytes() throws InterruptedException, IOException {
 		byte[] bytes = "Hello fastdfs".getBytes();
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
-		client.upload(info, bytes, bytes.length, "inf").addListener(f -> {
-			if (f.isSuccess()) {
-				System.out.println(f.getNow());
+		client.upload(info, bytes, bytes.length, "inf").action((a, ex) -> {
+			if (ex != null) {
+				ex.printStackTrace();
 			} else {
-				f.cause().printStackTrace();
+				System.out.println(a);
 			}
-		}).await();
+		});
 	}
 
 	@Test
@@ -85,13 +85,13 @@ public class StorageClientIT {
 	public void testUploadAppenderBytes() throws InterruptedException, IOException {
 		byte[] bytes = "Hello fastdfs".getBytes();
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
-		client.uploadAppender(info, bytes, bytes.length, "inf").addListener(f -> {
-			if (f.isSuccess()) {
-				System.out.println(f.getNow());
+		client.uploadAppender(info, bytes, bytes.length, "inf").action((a, ex) -> {
+			if (ex != null) {
+				ex.printStackTrace();
 			} else {
-				f.cause().printStackTrace();
+				System.out.println(a);
 			}
-		}).await();
+		});
 	}
 
 	@Test
@@ -101,13 +101,13 @@ public class StorageClientIT {
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
 		StoragePath spath = StoragePath
 				.fromFullPath("group1/M00/09/FF/wKgURFbQIp6EEG9xAAAAADVhaBw260.inf");
-		client.append(info, spath, bytes).addListener(f -> {
-			if (f.isSuccess()) {
-				System.out.println(f.getNow());
+		client.append(info, spath, bytes).action((a, ex) -> {
+			if (ex != null) {
+				ex.printStackTrace();
 			} else {
-				f.cause().printStackTrace();
+				System.out.println(a);
 			}
-		}).await();
+		});
 	}
 
 	@Test
@@ -117,13 +117,13 @@ public class StorageClientIT {
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
 		StoragePath spath = StoragePath
 				.fromFullPath("group1/M00/09/FF/wKgURFbQIp6EEG9xAAAAADVhaBw260.inf");
-		client.modify(info, spath, 12, bytes).addListener(f -> {
-			if (f.isSuccess()) {
-				System.out.println(f.getNow());
+		client.modify(info, spath, 12, bytes).action((a, ex) -> {
+			if (ex != null) {
+				ex.printStackTrace();
 			} else {
-				f.cause().printStackTrace();
+				System.out.println(a);
 			}
-		}).await();
+		});
 	}
 
 	@Test
@@ -132,13 +132,13 @@ public class StorageClientIT {
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
 		StoragePath spath = StoragePath
 				.fromFullPath("group1/M00/09/FF/wKgURFbQHjuACGt4AAAADTVhaBw716.inf");
-		client.delete(info, spath).addListener(f -> {
-			if (f.isSuccess()) {
-				System.out.println(f.getNow());
+		client.delete(info, spath).action((a, ex) -> {
+			if (ex != null) {
+				ex.printStackTrace();
 			} else {
-				f.cause().printStackTrace();
+				System.out.println(a);
 			}
-		}).await();
+		});
 	}
 
 	@Test
@@ -147,13 +147,13 @@ public class StorageClientIT {
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
 		StoragePath spath = StoragePath
 				.fromFullPath("group1/M00/09/FF/wKgURFbQIp6EEG9xAAAAADVhaBw260.inf");
-		client.truncate(info, spath, 10).addListener(f -> {
-			if (f.isSuccess()) {
-				System.out.println(f.getNow());
+		client.truncate(info, spath, 10).action((a, ex) -> {
+			if(ex != null) {
+				ex.printStackTrace();
 			} else {
-				f.cause().printStackTrace();
+				System.out.println(a);
 			}
-		}).await();
+		});
 	}
 
 	@Test
@@ -163,12 +163,12 @@ public class StorageClientIT {
 		StoragePath spath = StoragePath
 				.fromFullPath("group1/M00/09/FF/wKgURFbQIp6EEG9xAAAAADVhaBw260.inf");
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		client.download(info, spath, out).addListener(f -> {
-			if (f.isSuccess()) {
-				System.out.println(f.getNow());
+		client.download(info, spath, out).action((a, ex) -> {
+			if (ex != null) {
+				ex.printStackTrace();
 			} else {
-				f.cause().printStackTrace();
+				System.out.println(a);
 			}
-		}).await();
+		});
 	}
 }
