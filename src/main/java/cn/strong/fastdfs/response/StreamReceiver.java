@@ -57,12 +57,11 @@ public class StreamReceiver extends AbstractReceiver<Void> {
 			int after = in.readableBytes();
 			readed += before - after;
 
+			if (promise instanceof ProgressivePromise) {
+				((ProgressivePromise<Void>) promise).tryProgress(readed, length);
+			}
 			if (readed >= length) {
 				promise.setSuccess(null);
-			} else {
-				if (promise instanceof ProgressivePromise) {
-					((ProgressivePromise<Void>) promise).setProgress(readed, length);
-				}
 			}
 		} catch (IOException e) {
 			throw new FastdfsException("write response to output error.", e);
