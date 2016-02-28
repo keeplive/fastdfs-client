@@ -40,6 +40,7 @@ public class StorageClientIT {
 	}
 
 	@Test
+	@Ignore
 	public void testUploadFile() throws InterruptedException, IOException {
 		StorageServerInfo info = new StorageServerInfo("group1", "192.168.20.68", 23000);
 		CountDownLatch latch = new CountDownLatch(1);
