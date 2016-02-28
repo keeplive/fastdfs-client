@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import org.junit.After;
 import org.junit.Before;
@@ -34,13 +35,16 @@ public class TrackerClientIT {
 	@Test
 	@Ignore
 	public void testGetUploadStorageString() throws InterruptedException, IOException {
+		CountDownLatch latch = new CountDownLatch(1);
 		client.getUploadStorage("group1").action((info, ex) -> {
 			if(ex != null) {
 				ex.printStackTrace();
 			} else {
 				System.out.println(info);
 			}
+			latch.countDown();
 		});
+		latch.await();
 	}
 
 	@Test
@@ -48,13 +52,16 @@ public class TrackerClientIT {
 	public void testGetDownloadStorage() throws InterruptedException {
 		StoragePath spath = StoragePath
 				.fromFullPath("group1/M00/09/FE/wKgURFbQBVSAcFjdAAAADTVhaBw216.inf");
+		CountDownLatch latch = new CountDownLatch(1);
 		client.getDownloadStorage(spath).action((info, ex) -> {
 			if (ex != null) {
 				ex.printStackTrace();
 			} else {
 				System.out.println(info);
 			}
+			latch.countDown();
 		});
+		latch.await();
 	}
 
 	@Test
@@ -62,6 +69,7 @@ public class TrackerClientIT {
 	public void testFindDownloadStorages() throws InterruptedException {
 		StoragePath spath = StoragePath
 				.fromFullPath("group1/M00/09/FE/wKgURFbQBVSAcFjdAAAADTVhaBw216.inf");
+		CountDownLatch latch = new CountDownLatch(1);
 		client.findDownloadStorages(spath).action((infos, ex) -> {
 			if (ex != null) {
 				ex.printStackTrace();
@@ -70,7 +78,9 @@ public class TrackerClientIT {
 					System.out.println(info);
 				});
 			}
+			latch.countDown();
 		});
+		latch.await();
 	}
 
 }
