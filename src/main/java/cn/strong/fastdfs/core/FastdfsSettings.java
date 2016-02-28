@@ -12,10 +12,10 @@ package cn.strong.fastdfs.core;
  */
 public class FastdfsSettings {
 
-	private int eventLoopThreads = 0;
-	private int maxConnPerHost = 10;
-	private int connectTimeout = 10000;
-	private boolean keepAlive = true;
+	private int eventLoopThreads = 0; // 线程数量
+	private int maxConnPerHost = 10; // 每个IP最大连接数
+	private int connectTimeout = 10000; // 连接超时时间(毫秒)
+	private int maxIdleSeconds = 20; // 最大闲置时间(秒)
 
 	public int getEventLoopThreads() {
 		return eventLoopThreads;
@@ -41,12 +41,12 @@ public class FastdfsSettings {
 		this.connectTimeout = connectTimeout;
 	}
 
-	public boolean isKeepAlive() {
-		return keepAlive;
+	public int getMaxIdleSeconds() {
+		return maxIdleSeconds;
 	}
 
-	public void setKeepAlive(boolean keepAlive) {
-		this.keepAlive = keepAlive;
+	public void setMaxIdleSeconds(int maxIdleSeconds) {
+		this.maxIdleSeconds = maxIdleSeconds;
 	}
 
 }
